@@ -1,38 +1,102 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { supabase } from '@/lib/supabase';
+import { useState, useEffect } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 
 export default function Login() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isCheckingSession, setIsCheckingSession] = useState(true);
+
+  // Create a Supabase client that handles cookies properly
+  const supabase = createBrowserClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  );
+
+  // Check if user is already logged in
+  useEffect(() => {
+    let mounted = true;
+
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        console.log('Session check:', session ? 'Found session' : 'No session');
+        
+        if (mounted && session) {
+          const redirectTo = searchParams.get('redirectedFrom') || '/profile';
+          console.log('Redirecting to:', redirectTo);
+          router.push(redirectTo);
+        }
+      } catch (error) {
+        console.error('Error checking session:', error);
+      } finally {
+        if (mounted) {
+          setIsCheckingSession(false);
+        }
+      }
+    };
+
+    checkUser();
+
+    return () => {
+      mounted = false;
+    };
+  }, [searchParams, router]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    console.log('Login attempt started');
     setLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      console.log('Attempting to sign in with:', email);
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Login error:', error);
+        throw error;
+      }
 
-      router.push('/profile');
-      router.refresh();
+      console.log('Login response:', data);
+
+      if (data?.user) {
+        console.log('Login successful, user:', data.user.id);
+        const redirectTo = searchParams.get('redirectedFrom') || '/profile';
+        console.log('Redirecting to:', redirectTo);
+        router.push(redirectTo);
+      } else {
+        console.error('No user data in response');
+        throw new Error('No user data received');
+      }
     } catch (error) {
-      setError(error instanceof Error ? error.message : 'An error occurred');
+      console.error('Login error:', error);
+      setError(error instanceof Error ? error.message : 'An error occurred during login');
     } finally {
       setLoading(false);
     }
   };
+
+  if (isCheckingSession) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Checking session...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
