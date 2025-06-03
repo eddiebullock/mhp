@@ -2,12 +2,14 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr';
 import { NextResponse, type NextRequest } from 'next/server';
 
 export async function middleware(request: NextRequest) {
+  // Create a response object that we can modify
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   });
 
+  // Create a Supabase client configured to use cookies
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -34,17 +36,35 @@ export async function middleware(request: NextRequest) {
     }
   );
 
-  const { data: { session } } = await supabase.auth.getSession();
+  // Get the current path
+  const path = request.nextUrl.pathname;
 
-  // If user is not signed in and the current path is not /auth/login or /auth/signup
-  // redirect the user to /auth/login
-  if (!session && !request.nextUrl.pathname.startsWith('/auth')) {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
+  // Skip middleware for static files and API routes
+  if (
+    path.startsWith('/_next') ||
+    path.startsWith('/api') ||
+    path.startsWith('/static') ||
+    path.includes('.')
+  ) {
+    return response;
   }
 
-  // If user is signed in and the current path is /auth/login or /auth/signup
-  // redirect the user to /profile
-  if (session && request.nextUrl.pathname.startsWith('/auth')) {
+  // Define public paths that don't require authentication
+  const publicPaths = ['/auth/login', '/auth/signup', '/auth/callback', '/'];
+  const isPublicPath = publicPaths.some(publicPath => path === publicPath);
+
+  // Get the session
+  const { data: { session } } = await supabase.auth.getSession();
+
+  // If the user is not signed in and trying to access a protected route
+  if (!session && !isPublicPath) {
+    const redirectUrl = new URL('/auth/login', request.url);
+    redirectUrl.searchParams.set('redirectTo', path);
+    return NextResponse.redirect(redirectUrl);
+  }
+
+  // If the user is signed in and trying to access auth pages
+  if (session && (path === '/auth/login' || path === '/auth/signup')) {
     return NextResponse.redirect(new URL('/profile', request.url));
   }
 
@@ -54,12 +74,12 @@ export async function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     /*
-     * Match all request paths except for the ones starting with:
+     * Match all request paths except:
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
-     * Feel free to modify this pattern to include more paths.
+     * - public folder
      */
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
   ],
 }; 
