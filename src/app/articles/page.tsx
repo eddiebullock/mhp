@@ -20,6 +20,20 @@ export default function ArticlesPage() {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [placeholder, setPlaceholder] = useState('');
+
+  const searchTopics = [
+    'ADHD',
+    'anxiety',
+    'neurons',
+    'therapy',
+    'depression',
+    'meditation',
+    'stress',
+    'sleep',
+    'mindfulness',
+    'psychology'
+  ];
 
   const supabase = createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -30,6 +44,40 @@ export default function ArticlesPage() {
     fetchArticles();
     fetchCategories();
   }, [selectedCategory, searchQuery]);
+
+  useEffect(() => {
+    let currentIndex = 0;
+    let currentText = '';
+    let isDeleting = false;
+    let typingSpeed = 100;
+
+    const animatePlaceholder = () => {
+      const currentTopic = searchTopics[currentIndex];
+      
+      if (isDeleting) {
+        currentText = currentTopic.substring(0, currentText.length - 1);
+      } else {
+        currentText = currentTopic.substring(0, currentText.length + 1);
+      }
+
+      setPlaceholder(currentText);
+
+      if (!isDeleting && currentText === currentTopic) {
+        typingSpeed = 2000; // Pause at the end
+        isDeleting = true;
+      } else if (isDeleting && currentText === '') {
+        isDeleting = false;
+        currentIndex = (currentIndex + 1) % searchTopics.length;
+        typingSpeed = 100;
+      } else {
+        typingSpeed = isDeleting ? 50 : 100;
+      }
+
+      setTimeout(animatePlaceholder, typingSpeed);
+    };
+
+    animatePlaceholder();
+  }, []);
 
   const fetchArticles = async () => {
     try {
@@ -107,66 +155,21 @@ export default function ArticlesPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Articles</h1>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/profile"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                My Profile
-              </Link>
-              <form action="/auth/signout" method="post">
-                <button
-                  type="submit"
-                  className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
-                >
-                  Sign Out
-                </button>
-              </form>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         {/* Search and Filters */}
         <div className="bg-white shadow rounded-lg p-6 mb-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="search" className="block text-sm font-medium text-gray-700">
-                Search Articles
-              </label>
-              <input
-                type="text"
-                id="search"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                placeholder="Search by title or content..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <div>
-              <label htmlFor="category" className="block text-sm font-medium text-gray-700">
-                Category
-              </label>
-              <select
-                id="category"
-                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
-                value={selectedCategory}
-                onChange={(e) => setSelectedCategory(e.target.value)}
-              >
-                <option value="">All Categories</option>
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+          <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
+            Mental Health Science You Can Trust
+          </h1>
+          <div className="max-w-2xl mx-auto">
+            <input
+              type="text"
+              id="search"
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-lg py-3 px-4"
+              placeholder={`Search for ${placeholder}...`}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
@@ -189,7 +192,10 @@ export default function ArticlesPage() {
                   className="border rounded-lg p-6 hover:shadow-md transition-shadow"
                 >
                   <div className="flex justify-between items-start">
-                    <Link href={`/articles/${article.slug}`} className="flex-1">
+                    <Link
+                      href={`/articles/${article.id}`}
+                      className="block hover:bg-gray-50"
+                    >
                       <h2 className="text-xl font-semibold text-gray-900 mb-2">
                         {article.title}
                       </h2>
