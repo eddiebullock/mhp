@@ -1,40 +1,98 @@
+'use client';
+
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { createClient } from '@/lib/supabase';
 
 export default function HomePage() {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [placeholder, setPlaceholder] = useState('');
+
+  const searchTopics = [
+    'ADHD',
+    'anxiety',
+    'neurons',
+    'therapy',
+    'depression',
+    'meditation',
+    'stress',
+    'sleep',
+    'mindfulness',
+    'psychology'
+  ];
+
+  useEffect(() => {
+    let currentIndex = 0;
+    let currentText = '';
+    let isDeleting = false;
+    let typingSpeed = 100;
+
+    const animatePlaceholder = () => {
+      const currentTopic = searchTopics[currentIndex];
+      
+      if (isDeleting) {
+        currentText = currentTopic.substring(0, currentText.length - 1);
+      } else {
+        currentText = currentTopic.substring(0, currentText.length + 1);
+      }
+
+      setPlaceholder(currentText);
+
+      if (!isDeleting && currentText === currentTopic) {
+        typingSpeed = 2000; // Pause at the end
+        isDeleting = true;
+      } else if (isDeleting && currentText === '') {
+        isDeleting = false;
+        currentIndex = (currentIndex + 1) % searchTopics.length;
+        typingSpeed = 100;
+      } else {
+        typingSpeed = isDeleting ? 50 : 100;
+      }
+
+      setTimeout(animatePlaceholder, typingSpeed);
+    };
+
+    animatePlaceholder();
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      window.location.href = `/articles?search=${encodeURIComponent(searchQuery)}`;
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow">
-        <div className="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <h1 className="text-3xl font-bold text-gray-900">Mental Health Platform</h1>
-            <div className="flex items-center space-x-4">
-              <Link
-                href="/auth/login"
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
-              >
-                Sign in
-              </Link>
-              <Link
-                href="/auth/signup"
-                className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
-              >
-                Sign up
-              </Link>
-            </div>
-          </div>
-        </div>
-      </header>
-
       <main className="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div className="text-center">
-          <h2 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
-            Welcome to Mental Health Platform
-          </h2>
-          <p className="mt-5 max-w-xl mx-auto text-xl text-gray-500">
-            Your trusted source for mental health information and resources.
+          <h1 className="text-4xl font-extrabold text-gray-900 sm:text-5xl sm:tracking-tight lg:text-6xl">
+            Mental Health Platform
+          </h1>
+          <p className="mt-6 max-w-2xl mx-auto text-xl text-gray-500">
+            Evidence-based mental health information and resources
           </p>
-          <div className="mt-8 flex justify-center">
+          
+          {/* Search Bar */}
+          <div className="mt-8 max-w-2xl mx-auto">
+            <form onSubmit={handleSearch} className="relative">
+              <input
+                type="text"
+                className="w-full px-6 py-4 text-xl rounded-lg border-2 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500 shadow-lg text-gray-900 placeholder-gray-500"
+                placeholder={`Search for ${placeholder}...`}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                type="submit"
+                className="absolute right-2 top-1/2 transform -translate-y-1/2 px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                Search
+              </button>
+            </form>
+          </div>
+
+          <div className="mt-10">
             <Link
               href="/articles"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"

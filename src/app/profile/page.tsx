@@ -5,23 +5,17 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 
-interface Profile {
-  id: string;
-  email: string;
-  username: string;
-}
-
 interface SavedArticle {
   id: string;
-  article_id: string;
   title: string;
+  slug: string;
   summary: string;
-  category: string;
+  created_at: string;
 }
 
 export default function ProfilePage() {
   const router = useRouter();
-  const [profile, setProfile] = useState<Profile | null>(null);
+  const [profile, setProfile] = useState<any>(null);
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +26,6 @@ export default function ProfilePage() {
     const checkSession = async () => {
       try {
         const { data: { session }, error: sessionError } = await supabase.auth.getSession();
-        
         if (sessionError) throw sessionError;
         
         if (!session) {
@@ -40,7 +33,7 @@ export default function ProfilePage() {
           return;
         }
 
-        // Fetch profile data
+        // Fetch profile
         const { data: profileData, error: profileError } = await supabase
           .from('profiles')
           .select('*')
@@ -48,8 +41,8 @@ export default function ProfilePage() {
           .single();
 
         if (profileError) {
-          // If profile doesn't exist, create one
           if (profileError.code === 'PGRST116') {
+            // Profile doesn't exist, create one
             const { data: newProfile, error: createError } = await supabase
               .from('profiles')
               .insert([
@@ -72,32 +65,21 @@ export default function ProfilePage() {
         }
 
         // Fetch saved articles
-        const { data: articlesData, error: articlesError } = await supabase
+        const { data: savedData, error: savedError } = await supabase
           .from('saved_articles')
           .select(`
-            id,
-            article_id,
-            articles (
+            article:articles (
+              id,
               title,
+              slug,
               summary,
-              categories (
-                name
-              )
+              created_at
             )
           `)
           .eq('user_id', session.user.id);
 
-        if (articlesError) throw articlesError;
-
-        const formattedArticles = articlesData.map((item: any) => ({
-          id: item.id,
-          article_id: item.article_id,
-          title: item.articles.title,
-          summary: item.articles.summary,
-          category: item.articles.categories?.name || 'Uncategorized'
-        }));
-
-        setSavedArticles(formattedArticles);
+        if (savedError) throw savedError;
+        setSavedArticles(savedData.map((sa: any) => sa.article));
       } catch (error: any) {
         console.error('Error:', error);
         setError(error.message);
@@ -111,66 +93,33 @@ export default function ProfilePage() {
 
   const handleSignOut = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      await supabase.auth.signOut();
       router.replace('/');
-    } catch (error: any) {
-      setError(error.message || 'Sign out failed.');
-      router.replace('/');
+    } catch (error) {
+      console.error('Error signing out:', error);
     }
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex">
-                <Link href="/" className="flex items-center">
-                  <span className="text-xl font-bold text-indigo-600">MHP</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <div className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="animate-pulse">
-              <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
-              <div className="h-4 bg-gray-200 rounded w-1/2 mb-8"></div>
-              <div className="space-y-4">
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded"></div>
-                <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
-        <nav className="bg-white shadow">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex justify-between h-16">
-              <div className="flex">
-                <Link href="/" className="flex items-center">
-                  <span className="text-xl font-bold text-indigo-600">MHP</span>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </nav>
-        <div className="py-12 px-4 sm:px-6 lg:px-8">
-          <div className="max-w-3xl mx-auto">
-            <div className="bg-red-50 border border-red-400 text-red-700 px-4 py-3 rounded relative" role="alert">
-              <span className="block sm:inline">{error}</span>
-            </div>
-          </div>
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-4">Error</h2>
+          <p className="text-gray-600">{error}</p>
+          <button
+            onClick={() => router.push('/')}
+            className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
+          >
+            Return Home
+          </button>
         </div>
       </div>
     );
@@ -178,80 +127,48 @@ export default function ProfilePage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16">
-            <div className="flex">
-              <Link href="/" className="flex items-center">
-                <span className="text-xl font-bold text-indigo-600">MHP</span>
-              </Link>
-              <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
-                <Link
-                  href="/articles"
-                  className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                >
-                  Browse Articles
-                </Link>
-              </div>
-            </div>
-            <div className="flex items-center">
+      <main className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
+        <div className="px-4 py-6 sm:px-0">
+          <div className="bg-white shadow rounded-lg p-6">
+            <div className="flex justify-between items-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900">
+                Welcome back, {profile?.username || profile?.email || 'User'}
+              </h1>
               <button
                 onClick={handleSignOut}
-                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700"
               >
                 Sign out
               </button>
             </div>
-          </div>
-        </div>
-      </nav>
 
-      <div className="py-12 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-3xl mx-auto">
-          <div className="bg-white shadow overflow-hidden sm:rounded-lg">
-            <div className="px-4 py-5 sm:px-6">
-              <h1 className="text-2xl font-bold text-gray-900">Profile</h1>
-              <p className="mt-1 text-sm text-gray-500">
-                Welcome back, {profile?.username || profile?.email || 'User'}
-              </p>
-            </div>
-
-            <div className="border-t border-gray-200 px-4 py-5 sm:px-6">
-              <h2 className="text-lg font-medium text-gray-900 mb-4">Saved Articles</h2>
-              {savedArticles.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500">You haven't saved any articles yet.</p>
-                  <Link
-                    href="/articles"
-                    className="mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                  >
-                    Browse Articles
-                  </Link>
-                </div>
-              ) : (
+            <div className="mt-8">
+              <h2 className="text-xl font-semibold text-gray-900 mb-4">Saved Articles</h2>
+              {savedArticles.length > 0 ? (
                 <div className="space-y-4">
                   {savedArticles.map((article) => (
-                    <div
+                    <Link
                       key={article.id}
-                      className="bg-gray-50 rounded-lg p-4 hover:bg-gray-100 transition-colors"
+                      href={`/articles/${article.slug}`}
+                      className="block p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
                     >
-                      <Link href={`/articles/${article.article_id}`}>
-                        <h3 className="text-lg font-medium text-gray-900">{article.title}</h3>
-                        <p className="mt-1 text-sm text-gray-500">{article.summary}</p>
-                        <div className="mt-2">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                            {article.category}
-                          </span>
-                        </div>
-                      </Link>
-                    </div>
+                      <h3 className="text-lg font-medium text-gray-900">
+                        {article.title}
+                      </h3>
+                      <p className="mt-1 text-gray-600">{article.summary}</p>
+                      <p className="text-sm text-gray-500 mt-2">
+                        Saved on {new Date(article.created_at).toLocaleDateString()}
+                      </p>
+                    </Link>
                   ))}
                 </div>
+              ) : (
+                <p className="text-gray-500">No saved articles yet.</p>
               )}
             </div>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 } 
