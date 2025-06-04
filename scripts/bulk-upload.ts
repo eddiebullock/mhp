@@ -1,36 +1,86 @@
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
+import { fileURLToPath } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import dotenv from 'dotenv';
 
-// Load environment variables
-dotenv.config();
+// Get __dirname equivalent in ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-interface Article {
+// Load environment variables from .env.local
+const envPath = path.resolve(process.cwd(), '.env.local');
+console.log('Loading environment from:', envPath);
+dotenv.config({ path: envPath });
+
+// Debug environment variables
+console.log('Environment variables:');
+console.log('NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not set');
+console.log('SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not set');
+
+type ArticleCategory = 'mental_health' | 'neuroscience' | 'psychology' | 'brain_health' | 
+                      'neurodiversity' | 'interventions' | 'lifestyle_factors' | 'lab_testing';
+
+interface BaseArticle {
   title: string;
   slug: string;
   summary: string;
-  category_id: string;
-  content: {
-    overview: string;
-    mechanisms: string;
-    safety: string;
-    faqs: Array<{ question: string; answer: string }>;
-    keyEvidence: string;
-    practicalTakeaways: string;
-  };
-  tags: string[];
+  category: ArticleCategory;
+  overview: string;
+  future_directions: string;
+  references_and_resources: string;
   status: 'published' | 'draft' | 'archived';
+  tags: string[];
 }
+
+interface MentalHealthArticle extends BaseArticle {
+  category: 'mental_health' | 'neurodiversity';
+  prevalence: string;
+  causes_and_mechanisms: string;
+  symptoms_and_impact: string;
+  evidence_summary: string;
+  practical_takeaways: string;
+  common_myths: string;
+}
+
+interface NeuroscienceArticle extends BaseArticle {
+  category: 'neuroscience' | 'psychology' | 'brain_health';
+  definition: string;
+  mechanisms: string;
+  relevance: string;
+  key_studies: string;
+  common_misconceptions: string;
+  practical_implications: string;
+}
+
+interface InterventionArticle extends BaseArticle {
+  category: 'interventions' | 'lifestyle_factors';
+  how_it_works: string;
+  evidence_base: string;
+  effectiveness: string;
+  practical_applications: string;
+  common_myths: string;
+  risks_and_limitations: string;
+}
+
+interface LabTestingArticle extends BaseArticle {
+  category: 'lab_testing';
+  how_it_works: string;
+  applications: string;
+  strengths_and_limitations: string;
+  risks_and_limitations: string;
+}
+
+type Article = MentalHealthArticle | NeuroscienceArticle | InterventionArticle | LabTestingArticle;
 
 // Validate article data
 function validateArticle(article: any): article is Article {
-  const requiredFields = ['title', 'slug', 'summary', 'category_id', 'content', 'tags', 'status'];
-  const hasAllFields = requiredFields.every(field => field in article);
+  const requiredBaseFields = ['title', 'slug', 'summary', 'category', 'overview', 'status', 'tags'];
+  const hasAllBaseFields = requiredBaseFields.every(field => field in article);
   
-  if (!hasAllFields) {
-    console.error(`Missing required fields in article: ${article.title}`);
+  if (!hasAllBaseFields) {
+    console.error(`Missing required base fields in article: ${article.title}`);
     return false;
   }
 
@@ -44,15 +94,36 @@ function validateArticle(article: any): article is Article {
     return false;
   }
 
-  const contentFields = ['overview', 'mechanisms', 'safety', 'faqs', 'keyEvidence', 'practicalTakeaways'];
-  const hasAllContentFields = contentFields.every(field => field in article.content);
-  
-  if (!hasAllContentFields) {
-    console.error(`Missing required content fields in article: ${article.title}`);
-    return false;
-  }
+  // Validate category-specific fields
+  switch (article.category) {
+    case 'mental_health':
+    case 'neurodiversity':
+      const mentalHealthFields = ['prevalence', 'causes_and_mechanisms', 'symptoms_and_impact', 
+                                'evidence_summary', 'practical_takeaways', 'common_myths'];
+      return mentalHealthFields.every(field => field in article);
 
-  return true;
+    case 'neuroscience':
+    case 'psychology':
+    case 'brain_health':
+      const neuroscienceFields = ['definition', 'mechanisms', 'relevance', 'key_studies', 
+                                'common_misconceptions', 'practical_implications'];
+      return neuroscienceFields.every(field => field in article);
+
+    case 'interventions':
+    case 'lifestyle_factors':
+      const interventionFields = ['how_it_works', 'evidence_base', 'effectiveness', 
+                                'practical_applications', 'common_myths', 'risks_and_limitations'];
+      return interventionFields.every(field => field in article);
+
+    case 'lab_testing':
+      const labTestingFields = ['how_it_works', 'applications', 'strengths_and_limitations', 
+                               'risks_and_limitations'];
+      return labTestingFields.every(field => field in article);
+
+    default:
+      console.error(`Invalid category for article: ${article.title}`);
+      return false;
+  }
 }
 
 async function main() {
@@ -60,7 +131,7 @@ async function main() {
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
   if (!supabaseUrl || !supabaseKey) {
-    console.error('Missing Supabase credentials');
+    console.error('Missing Supabase credentials. Please ensure NEXT_PUBLIC_SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY are set in your .env.local file');
     process.exit(1);
   }
 
@@ -101,13 +172,9 @@ async function main() {
         try {
           const { error } = await supabase.from('articles').insert({
             id: uuidv4(),
-            title: article.title,
-            slug: article.slug,
-            summary: article.summary,
-            category_id: article.category_id,
-            content: article.content,
-            tags: article.tags,
-            status: article.status,
+            ...Object.fromEntries(
+              Object.entries(article).filter(([key]) => key !== 'lived_experience')
+            ),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
           });

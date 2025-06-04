@@ -17,9 +17,17 @@ export interface Database {
           slug: string
           summary: string
           content: string
-          category_id: string
-          status: 'draft' | 'published'
+          category: string
+          status: 'published' | 'draft'
           author_id: string
+          tags: string[]
+          overview: string
+          definition: string
+          mechanisms: string
+          clinical_implications: string
+          research_highlights: string
+          key_concepts: string[]
+          references: string[]
         }
         Insert: {
           id?: string
@@ -28,9 +36,17 @@ export interface Database {
           slug: string
           summary: string
           content: string
-          category_id: string
-          status?: 'draft' | 'published'
+          category: string
+          status?: 'published' | 'draft'
           author_id: string
+          tags?: string[]
+          overview?: string
+          definition?: string
+          mechanisms?: string
+          clinical_implications?: string
+          research_highlights?: string
+          key_concepts?: string[]
+          references?: string[]
         }
         Update: {
           id?: string
@@ -39,9 +55,17 @@ export interface Database {
           slug?: string
           summary?: string
           content?: string
-          category_id?: string
-          status?: 'draft' | 'published'
+          category?: string
+          status?: 'published' | 'draft'
           author_id?: string
+          tags?: string[]
+          overview?: string
+          definition?: string
+          mechanisms?: string
+          clinical_implications?: string
+          research_highlights?: string
+          key_concepts?: string[]
+          references?: string[]
         }
       }
       categories: {

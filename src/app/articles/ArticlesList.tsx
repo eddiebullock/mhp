@@ -6,11 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Database } from '@/types/supabase';
 
-type Article = Database['public']['Tables']['articles']['Row'] & {
-  categories: Database['public']['Tables']['categories']['Row'];
-};
-
-type Category = Database['public']['Tables']['categories']['Row'];
+type Article = Database['public']['Tables']['articles']['Row'];
 
 interface ArticlesListProps {
   initialArticles: Article[];
@@ -18,8 +14,7 @@ interface ArticlesListProps {
 
 export default function ArticlesList({ initialArticles }: ArticlesListProps) {
   const router = useRouter();
-  const [articles, setArticles] = useState<Article[]>(initialArticles);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [articles, setArticles] = useState<Article[]>(initialArticles || []);
   const [selectedCategory, setSelectedCategory] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const [loading, setLoading] = useState(false);
@@ -27,16 +22,16 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
   const [placeholder, setPlaceholder] = useState('');
 
   const searchTopics = [
-    'ADHD',
-    'anxiety',
-    'neurons',
-    'therapy',
+    'neuroplasticity',
+    'neurotransmitters',
+    'brain circuits',
+    'mental health',
+    'neuroscience',
     'depression',
-    'meditation',
-    'stress',
-    'sleep',
-    'mindfulness',
-    'psychology'
+    'anxiety',
+    'brain health',
+    'psychology',
+    'cognition'
   ];
 
   const supabase = createBrowserClient(
@@ -46,7 +41,6 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
 
   useEffect(() => {
     fetchArticles();
-    fetchCategories();
   }, [selectedCategory, searchQuery]);
 
   useEffect(() => {
@@ -88,20 +82,21 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
       setLoading(true);
       let query = supabase
         .from('articles')
-        .select(`
-          *,
-          categories (
-            name
-          )
-        `)
+        .select('*')
         .eq('status', 'published');
 
       if (selectedCategory) {
-        query = query.eq('category_id', selectedCategory);
+        query = query.eq('category', selectedCategory);
       }
 
       if (searchQuery) {
-        query = query.or(`title.ilike.%${searchQuery}%,summary.ilike.%${searchQuery}%`);
+        query = query.or(`
+          title.ilike.%${searchQuery}%,
+          summary.ilike.%${searchQuery}%,
+          overview.ilike.%${searchQuery}%,
+          definition.ilike.%${searchQuery}%,
+          mechanisms.ilike.%${searchQuery}%
+        `);
       }
 
       const { data, error } = await query.order('created_at', { ascending: false });
@@ -113,20 +108,6 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
       setError('Failed to load articles');
     } finally {
       setLoading(false);
-    }
-  };
-
-  const fetchCategories = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*')
-        .order('name');
-
-      if (error) throw error;
-      setCategories(data || []);
-    } catch (error) {
-      console.error('Error fetching categories:', error);
     }
   };
 
@@ -162,7 +143,7 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
       {/* Search and Filters */}
       <div className="bg-white shadow rounded-lg p-6 mb-6">
         <h1 className="text-3xl font-bold text-center text-gray-900 mb-8">
-          Mental Health Science You Can Trust
+          Mental Health & Neuroscience Research
         </h1>
         <div className="max-w-2xl mx-auto">
           <input
@@ -197,14 +178,24 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
                 <div className="flex justify-between items-start">
                   <Link
                     href={`/articles/${article.slug}`}
-                    className="block hover:bg-gray-50"
+                    className="block hover:bg-gray-50 flex-grow"
                   >
                     <h2 className="text-xl font-semibold text-gray-900 mb-2">
                       {article.title}
                     </h2>
                     <p className="text-gray-600 mb-4">{article.summary}</p>
+                    <div className="flex flex-wrap gap-2 mb-4">
+                      {(article.tags || []).map((tag, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
                     <div className="flex items-center text-sm text-gray-500">
-                      <span>Category: {article.categories?.name}</span>
+                      <span className="capitalize">Category: {article.category || 'Uncategorized'}</span>
                       <span className="mx-2">•</span>
                       <span>Published: {new Date(article.created_at).toLocaleDateString()}</span>
                     </div>

@@ -11,11 +11,13 @@ export default function Navigation() {
   useEffect(() => {
     const getUser = async () => {
       const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current session:', session); // Debug log
       setUser(session?.user || null);
     };
     getUser();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      console.log('Auth state changed:', session); // Debug log
       setUser(session?.user || null);
     });
 
@@ -26,6 +28,9 @@ export default function Navigation() {
     await supabase.auth.signOut();
     router.refresh();
   };
+
+  // Debug log for render
+  console.log('Current user state:', user);
 
   return (
     <nav className="bg-white shadow">
