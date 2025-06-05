@@ -10,7 +10,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 // Load environment variables from .env.local
-const envPath = path.resolve(process.cwd(), '.env.local');
+const envPath = path.resolve(process.cwd(), '..', '.env.local');
 console.log('Loading environment from:', envPath);
 dotenv.config({ path: envPath });
 
@@ -32,6 +32,12 @@ interface BaseArticle {
   references_and_resources: string;
   status: 'published' | 'draft' | 'archived';
   tags: string[];
+  faqs?: Array<{
+    question: string;
+    answer: string;
+  }>;
+  keyEvidence?: string;
+  practicalTakeaways?: string;
 }
 
 interface MentalHealthArticle extends BaseArticle {
@@ -164,6 +170,25 @@ function validateArticle(article: any): article is Article {
   }
 }
 
+// Transform neurodiversity article to match required schema
+function transformNeurodiversityArticle(article: any) {
+  return {
+    ...article,
+    neurodiversity_perspective: article.overview,
+    common_strengths_and_challenges: article.mechanisms,
+    prevalence_and_demographics: article.mechanisms,
+    mechanisms_and_understanding: article.mechanisms,
+    evidence_summary: article.keyEvidence || article.mechanisms,
+    common_misconceptions: article.mechanisms,
+    practical_takeaways: Array.isArray(article.practicalTakeaways) 
+      ? article.practicalTakeaways.join('\n\n')
+      : article.mechanisms,
+    lived_experience: article.overview,
+    future_directions: article.future_directions || 'No future directions available.',
+    references_and_resources: article.references_and_resources || 'References coming soon.'
+  };
+}
+
 async function main() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -202,20 +227,44 @@ async function main() {
       console.log(`Processing batch ${batchIndex + 1}/${batches.length}`);
 
       for (const article of batch) {
-        if (!validateArticle(article)) {
+        // Transform neurodiversity articles
+        const transformedArticle = article.category === 'neurodiversity' 
+          ? transformNeurodiversityArticle(article)
+          : article;
+
+        if (!validateArticle(transformedArticle)) {
+          console.error(`Validation failed for article: ${article.title}`);
           errorCount++;
           continue;
         }
 
         try {
-          const { error } = await supabase.from('articles').insert({
-            id: uuidv4(),
-            ...Object.fromEntries(
-              Object.entries(article).filter(([key]) => key !== 'lived_experience')
-            ),
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
-          });
+          // Whitelist of allowed fields for upsert
+          const allowedFields = [
+            'title', 'slug', 'summary', 'category', 'overview', 'future_directions',
+            'references_and_resources', 'status', 'tags', 'prevalence', 'causes_and_mechanisms',
+            'symptoms_and_impact', 'evidence_summary', 'practical_takeaways', 'common_myths',
+            'definition', 'mechanisms', 'relevance', 'key_studies', 'common_misconceptions',
+            'practical_implications', 'core_principles', 'key_studies_and_theories',
+            'practical_applications', 'neurodiversity_perspective', 'common_strengths_and_challenges',
+            'prevalence_and_demographics', 'mechanisms_and_understanding', 'lived_experience',
+            'how_it_works', 'evidence_base', 'effectiveness', 'risks_and_limitations',
+            'applications', 'strengths_and_limitations'
+          ];
+          const articleData = Object.fromEntries(
+            Object.entries(transformedArticle).filter(([key]) => allowedFields.includes(key))
+          );
+
+          const { error } = await supabase
+            .from('articles')
+            .upsert({
+              id: uuidv4(),
+              ...articleData,
+              created_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+            }, {
+              onConflict: 'slug'
+            });
 
           if (error) {
             console.error(`Error inserting article "${article.title}":`, error.message);

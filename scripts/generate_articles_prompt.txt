@@ -1,14 +1,54 @@
-You are a professional medical writer creating articles in the style of Examine.com—balanced, evidence-based, and scientifically rigorous. Please generate 3 high-quality articles for each of the following topics:
+You are a professional medical writer creating articles in the style of Examine.com—balanced, evidence-based, and scientifically rigorous.
 
-1. 
-2. 
-3. 
-4. 
-5. 
+1. amotion and affect
+2. cognitive development
+3. memory and learning
+4. develomental psychology
+5. braipsychopathology
 
 Each article must be in **JSON format** and follow this structure:
 
 ```json
+
+Neurodiversity
+{
+  "title": "",
+  "slug": "",
+  "summary": "",
+  "category": "Neurodiversity",
+  "overview": "",
+  "neurodiversity_perspective": "",
+  "common_strengths_and_challenges": "",
+  "prevalence_and_demographics": "",
+  "mechanisms_and_understanding": "",
+  "evidence_summary": "",
+  "common_misconceptions": "",
+  "practical_takeaways": "",
+  "lived_experience": "",
+  "future_directions": "",
+  "references_and_resources": "",
+  "status": "published",
+  "tags": []
+}
+
+PSYCHOLOGY
+{
+  "title": "",
+  "slug": "",
+  "summary": "",
+  "category": "Psychology",
+  "definition": "",
+  "core_principles": "",
+  "relevance": "",
+  "key_studies_and_theories": "",
+  "common_misconceptions": "",
+  "practical_applications": "",
+  "future_directions": "",
+  "references_and_resources": "",
+  "status": "published",
+  "tags": []
+}
+
 MENTAL HEALTH 
 {
   "title": "",
