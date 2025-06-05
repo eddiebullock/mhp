@@ -108,9 +108,191 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   };
 
   const renderContent = () => {
-    const categoryType = getCategoryType(article.category);
+    switch (article.category) {
+      case 'mental_health':
+        return (
+          <>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
+            </section>
 
-    switch (categoryType) {
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Prevalence</h2>
+              {renderMarkdown(article.prevalence) || <p className="text-gray-500 italic">No prevalence information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Causes and Mechanisms</h2>
+              {renderMarkdown(article.causes_and_mechanisms) || <p className="text-gray-500 italic">No causes and mechanisms information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Symptoms and Impact</h2>
+              {renderMarkdown(article.symptoms_and_impact) || <p className="text-gray-500 italic">No symptoms and impact information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Summary</h2>
+              {renderMarkdown(article.evidence_summary) || <p className="text-gray-500 italic">No evidence summary available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Takeaways</h2>
+              {renderMarkdown(article.practical_takeaways) || <p className="text-gray-500 italic">No practical takeaways available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Myths</h2>
+              {renderMarkdown(article.common_myths) || <p className="text-gray-500 italic">No common myths information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
+              <div className="space-y-4">
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
+                )}
+              </div>
+            </section>
+          </>
+        );
+
+      case 'psychology':
+        return (
+          <>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Definition</h2>
+              {renderMarkdown(article.definition) || <p className="text-gray-500 italic">No definition available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Core Principles</h2>
+              {renderMarkdown(article.core_principles) || <p className="text-gray-500 italic">No core principles available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Relevance</h2>
+              {renderMarkdown(article.relevance) || <p className="text-gray-500 italic">No relevance information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Key Studies and Theories</h2>
+              {renderMarkdown(article.key_studies_and_theories) || <p className="text-gray-500 italic">No key studies and theories available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Misconceptions</h2>
+              {renderMarkdown(article.common_misconceptions) || <p className="text-gray-500 italic">No common misconceptions available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Applications</h2>
+              {renderMarkdown(article.practical_applications) || <p className="text-gray-500 italic">No practical applications available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
+              <div className="space-y-4">
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
+                )}
+              </div>
+            </section>
+          </>
+        );
+
+      case 'neurodiversity':
+        return (
+          <>
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Neurodiversity Perspective</h2>
+              {renderMarkdown(article.neurodiversity_perspective) || <p className="text-gray-500 italic">No neurodiversity perspective available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Strengths and Challenges</h2>
+              {renderMarkdown(article.common_strengths_and_challenges) || <p className="text-gray-500 italic">No information available on common strengths and challenges.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Prevalence and Demographics</h2>
+              {renderMarkdown(article.prevalence_and_demographics) || <p className="text-gray-500 italic">No prevalence and demographics information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Mechanisms and Understanding</h2>
+              {renderMarkdown(article.mechanisms_and_understanding) || <p className="text-gray-500 italic">No mechanisms and understanding information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Summary</h2>
+              {renderMarkdown(article.evidence_summary) || <p className="text-gray-500 italic">No evidence summary available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Misconceptions</h2>
+              {renderMarkdown(article.common_misconceptions) || <p className="text-gray-500 italic">No common misconceptions available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Takeaways</h2>
+              {renderMarkdown(article.practical_takeaways) || <p className="text-gray-500 italic">No practical takeaways available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Lived Experience</h2>
+              {renderMarkdown(article.lived_experience) || <p className="text-gray-500 italic">No lived experience information available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
+            </section>
+
+            <section className="mb-8">
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
+              <div className="space-y-4">
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
+                )}
+              </div>
+            </section>
+          </>
+        );
+
       case 'neuroscience':
         return (
           <>
@@ -142,69 +324,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Implications</h2>
               {renderMarkdown(article.practical_implications) || <p className="text-gray-500 italic">No practical implications available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
-              <div className="space-y-4">
-                {article.references_and_resources ? (
-                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
-                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">References coming soon.</p>
-                )}
-              </div>
-            </section>
-          </>
-        );
-
-      case 'mental health':
-        return (
-          <>
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Prevalence</h2>
-              {renderMarkdown(article.prevalence) || <p className="text-gray-500 italic">No prevalence information available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Causes and Mechanisms</h2>
-              {renderMarkdown(article.causes_and_mechanisms) || <p className="text-gray-500 italic">No causes and mechanisms information available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Symptoms and Impact</h2>
-              {renderMarkdown(article.symptoms_and_impact) || <p className="text-gray-500 italic">No symptoms and impact information available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Summary</h2>
-              {renderMarkdown(article.evidence_summary) || <p className="text-gray-500 italic">No evidence summary available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Myths</h2>
-              {renderMarkdown(article.common_myths) || <p className="text-gray-500 italic">No common myths information available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Takeaways</h2>
-              {renderMarkdown(article.practical_takeaways) || <p className="text-gray-500 italic">No practical takeaways available.</p>}
-            </section>
-
-            <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Lived Experience</h2>
-              {renderMarkdown(article.lived_experience) || <p className="text-gray-500 italic">No lived experience information available.</p>}
             </section>
 
             <section className="mb-8">

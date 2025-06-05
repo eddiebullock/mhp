@@ -35,7 +35,7 @@ interface BaseArticle {
 }
 
 interface MentalHealthArticle extends BaseArticle {
-  category: 'mental_health' | 'neurodiversity';
+  category: 'mental_health';
   prevalence: string;
   causes_and_mechanisms: string;
   symptoms_and_impact: string;
@@ -52,6 +52,28 @@ interface NeuroscienceArticle extends BaseArticle {
   key_studies: string;
   common_misconceptions: string;
   practical_implications: string;
+}
+
+interface PsychologyArticle extends BaseArticle {
+  category: 'psychology';
+  definition: string;
+  core_principles: string;
+  relevance: string;
+  key_studies_and_theories: string;
+  common_misconceptions: string;
+  practical_applications: string;
+}
+
+interface NeurodiversityArticle extends BaseArticle {
+  category: 'neurodiversity';
+  neurodiversity_perspective: string;
+  common_strengths_and_challenges: string;
+  prevalence_and_demographics: string;
+  mechanisms_and_understanding: string;
+  evidence_summary: string;
+  common_misconceptions: string;
+  practical_takeaways: string;
+  lived_experience: string;
 }
 
 interface InterventionArticle extends BaseArticle {
@@ -72,7 +94,8 @@ interface LabTestingArticle extends BaseArticle {
   risks_and_limitations: string;
 }
 
-type Article = MentalHealthArticle | NeuroscienceArticle | InterventionArticle | LabTestingArticle;
+type Article = MentalHealthArticle | NeuroscienceArticle | PsychologyArticle | 
+              NeurodiversityArticle | InterventionArticle | LabTestingArticle;
 
 // Validate article data
 function validateArticle(article: any): article is Article {
@@ -97,17 +120,28 @@ function validateArticle(article: any): article is Article {
   // Validate category-specific fields
   switch (article.category) {
     case 'mental_health':
-    case 'neurodiversity':
       const mentalHealthFields = ['prevalence', 'causes_and_mechanisms', 'symptoms_and_impact', 
                                 'evidence_summary', 'practical_takeaways', 'common_myths'];
       return mentalHealthFields.every(field => field in article);
 
     case 'neuroscience':
-    case 'psychology':
     case 'brain_health':
       const neuroscienceFields = ['definition', 'mechanisms', 'relevance', 'key_studies', 
                                 'common_misconceptions', 'practical_implications'];
       return neuroscienceFields.every(field => field in article);
+
+    case 'psychology':
+      const psychologyFields = ['definition', 'core_principles', 'relevance', 
+                              'key_studies_and_theories', 'common_misconceptions', 
+                              'practical_applications'];
+      return psychologyFields.every(field => field in article);
+
+    case 'neurodiversity':
+      const neurodiversityFields = ['neurodiversity_perspective', 'common_strengths_and_challenges',
+                                  'prevalence_and_demographics', 'mechanisms_and_understanding',
+                                  'evidence_summary', 'common_misconceptions', 'practical_takeaways',
+                                  'lived_experience'];
+      return neurodiversityFields.every(field => field in article);
 
     case 'interventions':
       const interventionFields = ['how_it_works', 'evidence_base', 'effectiveness', 
