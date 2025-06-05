@@ -2,16 +2,18 @@ import { Metadata } from 'next';
 import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Database } from '@/types/supabase';
+import ReactMarkdown from 'react-markdown';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 
 export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
   const supabase = await createClient();
+  const slug = params.slug;
   
   const { data: article } = await supabase
     .from('articles')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single();
 
   if (!article) {
@@ -41,11 +43,12 @@ export async function generateMetadata({ params }: { params: { slug: string } })
 
 export default async function ArticlePage({ params }: { params: { slug: string } }) {
   const supabase = await createClient();
+  const slug = params.slug;
   
   const { data: article, error } = await supabase
     .from('articles')
     .select('*')
-    .eq('slug', params.slug)
+    .eq('slug', slug)
     .single();
 
   if (error || !article) {
@@ -95,6 +98,15 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     return normalizedCategory;
   };
 
+  const renderMarkdown = (content: string | null) => {
+    if (!content) return null;
+    return (
+      <div className="prose prose-gray max-w-none [&>p]:text-black [&>ul]:text-black [&>ol]:text-black [&>li]:text-black">
+        <ReactMarkdown>{content}</ReactMarkdown>
+      </div>
+    );
+  };
+
   const renderContent = () => {
     const categoryType = getCategoryType(article.category);
 
@@ -104,49 +116,48 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Definition</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.definition || 'No definition available.'}</div>
+              {renderMarkdown(article.definition) || <p className="text-gray-500 italic">No definition available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Mechanisms</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.mechanisms || 'No mechanisms information available.'}</div>
+              {renderMarkdown(article.mechanisms) || <p className="text-gray-500 italic">No mechanisms information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Relevance</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.relevance || 'No relevance information available.'}</div>
+              {renderMarkdown(article.relevance) || <p className="text-gray-500 italic">No relevance information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Key Studies</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.key_studies || 'No key studies available.'}</div>
+              {renderMarkdown(article.key_studies) || <p className="text-gray-500 italic">No key studies available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Misconceptions</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.common_misconceptions || 'No misconceptions information available.'}</div>
+              {renderMarkdown(article.common_misconceptions) || <p className="text-gray-500 italic">No misconceptions information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Implications</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.practical_implications || 'No practical implications available.'}</div>
+              {renderMarkdown(article.practical_implications) || <p className="text-gray-500 italic">No practical implications available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.future_directions || 'No future directions available.'}</div>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
               <div className="space-y-4">
-                {(article.references || []).map((reference: string, index: number) => (
-                  <div key={index} className="border-b border-gray-200 pb-4">
-                    <p className="text-gray-600">{reference}</p>
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
                   </div>
-                ))}
-                {(!article.references || article.references.length === 0) && (
-                  <p className="text-gray-500 italic">No references available.</p>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
                 )}
               </div>
             </section>
@@ -158,59 +169,58 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.overview || 'No overview available.'}</div>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Prevalence</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.prevalence || 'No prevalence information available.'}</div>
+              {renderMarkdown(article.prevalence) || <p className="text-gray-500 italic">No prevalence information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Causes and Mechanisms</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.causes_and_mechanisms || 'No causes and mechanisms information available.'}</div>
+              {renderMarkdown(article.causes_and_mechanisms) || <p className="text-gray-500 italic">No causes and mechanisms information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Symptoms and Impact</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.symptoms_and_impact || 'No symptoms and impact information available.'}</div>
+              {renderMarkdown(article.symptoms_and_impact) || <p className="text-gray-500 italic">No symptoms and impact information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Summary</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.evidence_summary || 'No evidence summary available.'}</div>
+              {renderMarkdown(article.evidence_summary) || <p className="text-gray-500 italic">No evidence summary available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Myths</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.common_myths || 'No common myths information available.'}</div>
+              {renderMarkdown(article.common_myths) || <p className="text-gray-500 italic">No common myths information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Takeaways</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.practical_takeaways || 'No practical takeaways available.'}</div>
+              {renderMarkdown(article.practical_takeaways) || <p className="text-gray-500 italic">No practical takeaways available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Lived Experience</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.lived_experience || 'No lived experience information available.'}</div>
+              {renderMarkdown(article.lived_experience) || <p className="text-gray-500 italic">No lived experience information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              <div className="text-gray-600 prose prose-indigo max-w-none">{article.future_directions || 'No future directions available.'}</div>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
               <div className="space-y-4">
-                {(article.references || []).map((reference: string, index: number) => (
-                  <div key={index} className="border-b border-gray-200 pb-4">
-                    <p className="text-gray-600">{reference}</p>
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
                   </div>
-                ))}
-                {(!article.references || article.references.length === 0) && (
-                  <p className="text-gray-500 italic">No references available.</p>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
                 )}
               </div>
             </section>
@@ -222,54 +232,53 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-              <div className="text-gray-600">{article.overview || 'No overview available.'}</div>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">How It Works</h2>
-              <div className="text-gray-600">{article.how_it_works || 'No information available on how it works.'}</div>
+              {renderMarkdown(article.how_it_works) || <p className="text-gray-500 italic">No information available on how it works.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Base</h2>
-              <div className="text-gray-600">{article.evidence_base || 'No evidence base information available.'}</div>
+              {renderMarkdown(article.evidence_base) || <p className="text-gray-500 italic">No evidence base information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Effectiveness</h2>
-              <div className="text-gray-600">{article.effectiveness || 'No effectiveness information available.'}</div>
+              {renderMarkdown(article.effectiveness) || <p className="text-gray-500 italic">No effectiveness information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Applications</h2>
-              <div className="text-gray-600">{article.practical_applications || 'No practical applications available.'}</div>
+              {renderMarkdown(article.practical_applications) || <p className="text-gray-500 italic">No practical applications available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Common Myths</h2>
-              <div className="text-gray-600">{article.common_myths || 'No common myths information available.'}</div>
+              {renderMarkdown(article.common_myths) || <p className="text-gray-500 italic">No common myths information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Risks and Limitations</h2>
-              <div className="text-gray-600">{article.risks_and_limitations || 'No risks and limitations information available.'}</div>
+              {renderMarkdown(article.risks_and_limitations) || <p className="text-gray-500 italic">No risks and limitations information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              <div className="text-gray-600">{article.future_directions || 'No future directions available.'}</div>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
               <div className="space-y-4">
-                {(article.references || []).map((reference: string, index: number) => (
-                  <div key={index} className="border-b border-gray-200 pb-4">
-                    <p className="text-gray-600">{reference}</p>
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
                   </div>
-                ))}
-                {(!article.references || article.references.length === 0) && (
-                  <p className="text-gray-500 italic">No references available.</p>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
                 )}
               </div>
             </section>
@@ -281,44 +290,43 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-              <div className="text-gray-600">{article.overview || 'No overview available.'}</div>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Mechanisms</h2>
-              <div className="text-gray-600">{article.mechanisms || 'No mechanisms information available.'}</div>
+              {renderMarkdown(article.mechanisms) || <p className="text-gray-500 italic">No mechanisms information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Evidence Summary</h2>
-              <div className="text-gray-600">{article.evidence_summary || 'No evidence summary available.'}</div>
+              {renderMarkdown(article.evidence_summary) || <p className="text-gray-500 italic">No evidence summary available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Practical Takeaways</h2>
-              <div className="text-gray-600">{article.practical_takeaways || 'No practical takeaways available.'}</div>
+              {renderMarkdown(article.practical_takeaways) || <p className="text-gray-500 italic">No practical takeaways available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Risks and Limitations</h2>
-              <div className="text-gray-600">{article.risks_and_limitations || 'No risks and limitations information available.'}</div>
+              {renderMarkdown(article.risks_and_limitations) || <p className="text-gray-500 italic">No risks and limitations information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              <div className="text-gray-600">{article.future_directions || 'No future directions available.'}</div>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
               <div className="space-y-4">
-                {(article.references || []).map((reference: string, index: number) => (
-                  <div key={index} className="border-b border-gray-200 pb-4">
-                    <p className="text-gray-600">{reference}</p>
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
                   </div>
-                ))}
-                {(!article.references || article.references.length === 0) && (
-                  <p className="text-gray-500 italic">No references available.</p>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
                 )}
               </div>
             </section>
@@ -330,44 +338,43 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <>
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Overview</h2>
-              <div className="text-gray-600">{article.overview || 'No overview available.'}</div>
+              {renderMarkdown(article.overview) || <p className="text-gray-500 italic">No overview available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">How It Works</h2>
-              <div className="text-gray-600">{article.how_it_works || 'No information available on how it works.'}</div>
+              {renderMarkdown(article.how_it_works) || <p className="text-gray-500 italic">No information available on how it works.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Applications</h2>
-              <div className="text-gray-600">{article.applications || 'No applications information available.'}</div>
+              {renderMarkdown(article.applications) || <p className="text-gray-500 italic">No applications information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Strengths and Limitations</h2>
-              <div className="text-gray-600">{article.strengths_and_limitations || 'No strengths and limitations information available.'}</div>
+              {renderMarkdown(article.strengths_and_limitations) || <p className="text-gray-500 italic">No strengths and limitations information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Risks and Safety</h2>
-              <div className="text-gray-600">{article.risks_and_safety || 'No risks and safety information available.'}</div>
+              {renderMarkdown(article.risks_and_safety) || <p className="text-gray-500 italic">No risks and safety information available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">Future Directions</h2>
-              <div className="text-gray-600">{article.future_directions || 'No future directions available.'}</div>
+              {renderMarkdown(article.future_directions) || <p className="text-gray-500 italic">No future directions available.</p>}
             </section>
 
             <section className="mb-8">
               <h2 className="text-2xl font-semibold text-gray-900 mb-4">References</h2>
               <div className="space-y-4">
-                {(article.references || []).map((reference: string, index: number) => (
-                  <div key={index} className="border-b border-gray-200 pb-4">
-                    <p className="text-gray-600">{reference}</p>
+                {article.references_and_resources ? (
+                  <div className="prose prose-gray max-w-none prose-p:text-gray-900 prose-li:text-gray-900">
+                    <ReactMarkdown>{article.references_and_resources}</ReactMarkdown>
                   </div>
-                ))}
-                {(!article.references || article.references.length === 0) && (
-                  <p className="text-gray-500 italic">No references available.</p>
+                ) : (
+                  <p className="text-gray-500 italic">References coming soon.</p>
                 )}
               </div>
             </section>
@@ -394,7 +401,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               </span>
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
-            <p className="text-lg text-gray-600 mb-6">{article.summary}</p>
+            <p className="text-lg text-gray-900 mb-6">{article.summary}</p>
             
             <div className="flex flex-wrap gap-2 mb-8">
               {(article.tags || []).map((tag: string) => (
@@ -407,12 +414,12 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               ))}
             </div>
 
-            <div className="prose prose-indigo max-w-none">
+            <div className="prose prose-gray max-w-none [&>p]:text-black [&>ul]:text-black [&>ol]:text-black [&>li]:text-black">
               {renderContent()}
             </div>
 
             <div className="mt-8 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-500">
+              <p className="text-sm text-gray-900">
                 Published: {new Date(article.created_at).toLocaleDateString()}
               </p>
             </div>
