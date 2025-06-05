@@ -93,7 +93,7 @@ LAB TESTING
   "how_it_works": "",
   "applications": "",
   "strengths_and_limitations": "",
-  "risks_and_safety": "",
+  "risks_and_limitations": "",
   "future_directions": "",
   "references_and_resources": "",
   "status": "published",

@@ -110,14 +110,18 @@ function validateArticle(article: any): article is Article {
       return neuroscienceFields.every(field => field in article);
 
     case 'interventions':
-    case 'lifestyle_factors':
       const interventionFields = ['how_it_works', 'evidence_base', 'effectiveness', 
                                 'practical_applications', 'common_myths', 'risks_and_limitations'];
       return interventionFields.every(field => field in article);
 
+    case 'lifestyle_factors':
+      const lifestyleFields = ['mechanisms', 'evidence_summary', 'practical_takeaways', 
+                             'risks_and_limitations', 'future_directions'];
+      return lifestyleFields.every(field => field in article);
+
     case 'lab_testing':
       const labTestingFields = ['how_it_works', 'applications', 'strengths_and_limitations', 
-                               'risks_and_limitations'];
+                               'risks_and_limitations', 'future_directions'];
       return labTestingFields.every(field => field in article);
 
     default:
@@ -208,5 +212,6 @@ async function main() {
     process.exit(1);
   }
 }
+
 
 main().catch(console.error); 

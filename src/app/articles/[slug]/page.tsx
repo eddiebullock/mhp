@@ -101,7 +101,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
   const renderMarkdown = (content: string | null) => {
     if (!content) return null;
     return (
-      <div className="prose prose-gray max-w-none [&>p]:text-black [&>ul]:text-black [&>ol]:text-black [&>li]:text-black">
+      <div className="prose prose-gray max-w-none [&_*]:text-black [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900">
         <ReactMarkdown>{content}</ReactMarkdown>
       </div>
     );
@@ -357,8 +357,8 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             </section>
 
             <section className="mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Risks and Safety</h2>
-              {renderMarkdown(article.risks_and_safety) || <p className="text-gray-500 italic">No risks and safety information available.</p>}
+              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Risks and Limitations</h2>
+              {renderMarkdown(article.risks_and_limitations) || <p className="text-gray-500 italic">No risks and limitations information available.</p>}
             </section>
 
             <section className="mb-8">
@@ -414,7 +414,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
               ))}
             </div>
 
-            <div className="prose prose-gray max-w-none [&>p]:text-black [&>ul]:text-black [&>ol]:text-black [&>li]:text-black">
+            <div className="prose prose-gray max-w-none [&_*]:text-black [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900">
               {renderContent()}
             </div>
 
