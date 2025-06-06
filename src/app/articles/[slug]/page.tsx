@@ -103,7 +103,7 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     if (!blocks) return null;
 
     return (
-      <>
+      <div className="prose max-w-none">
         {blocks.overview && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Overview</h2>
@@ -160,10 +160,18 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </section>
         )}
 
-        {blocks.practical_takeaways && (
+        {blocks.practicalTakeaways && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Practical Takeaways</h2>
-            <ReactMarkdown>{blocks.practical_takeaways}</ReactMarkdown>
+            <div className="space-y-2">
+              {Array.isArray(blocks.practicalTakeaways) ? (
+                blocks.practicalTakeaways.map((takeaway: string, index: number) => (
+                  <p key={index} className="text-gray-600">{takeaway}</p>
+                ))
+              ) : (
+                <ReactMarkdown>{blocks.practicalTakeaways}</ReactMarkdown>
+              )}
+            </div>
           </section>
         )}
 
@@ -306,7 +314,46 @@ export default async function ArticlePage({ params }: { params: { slug: string }
             <ReactMarkdown>{blocks.key_studies_and_theories}</ReactMarkdown>
           </section>
         )}
-      </>
+
+        {blocks.keyEvidence && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Key Evidence</h2>
+            <ReactMarkdown>{blocks.keyEvidence}</ReactMarkdown>
+          </section>
+        )}
+
+        {blocks.safety && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Safety</h2>
+            <ReactMarkdown>{blocks.safety}</ReactMarkdown>
+          </section>
+        )}
+
+        {blocks.faqs && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
+            <div className="space-y-4">
+              {blocks.faqs.map((faq: { question: string; answer: string }, index: number) => (
+                <div key={index} className="border-l-4 border-indigo-500 pl-4">
+                  <h3 className="font-semibold mb-2">{faq.question}</h3>
+                  <p className="text-gray-600">{faq.answer}</p>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {blocks.references && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">References</h2>
+            <div className="space-y-2">
+              {blocks.references.map((ref: string, index: number) => (
+                <p key={index} className="text-sm text-gray-600">{ref}</p>
+              ))}
+            </div>
+          </section>
+        )}
+      </div>
     );
   };
 

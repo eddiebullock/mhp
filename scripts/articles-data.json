@@ -1,211 +1,190 @@
 [
   {
-    "title": "ADHD: Understanding Attention-Deficit/Hyperactivity Disorder",
-    "slug": "adhd",
-    "summary": "Explores the characteristics, underlying mechanisms, and support strategies for individuals with ADHD.",
-    "category": "neurodiversity",
-    "overview": "ADHD is a neurodevelopmental condition that involves differences in attention regulation, impulse control, and hyperactivity. It is recognized as a lifelong condition, though symptoms can change over time (1).\n\nPeople with ADHD often exhibit creativity, high energy, and the ability to think outside the box. However, they may also experience challenges with organization, focus, and time management (2).",
-    "mechanisms": "Research has linked ADHD to differences in dopamine and norepinephrine signaling, which affect executive function and reward pathways in the brain (3). Structural MRI studies show variations in the prefrontal cortex and striatum (4).",
-    "safety": "ADHD itself is not dangerous, but untreated symptoms can lead to difficulties in academic, work, and social settings (5). Evidence-based treatments, including behavioral therapy and medications like stimulants, can improve quality of life (6).",
-    "faqs": [
-      {
-        "question": "Can adults have ADHD?",
-        "answer": "Yes, ADHD often persists into adulthood, although symptoms may present differently across the lifespan (7)."
-      },
-      {
-        "question": "Are stimulant medications safe?",
-        "answer": "When prescribed and monitored by healthcare professionals, stimulant medications are generally safe and effective for managing ADHD symptoms (8)."
-      }
-    ],
-    "keyEvidence": "A 2018 meta-analysis (Cortese et al., 2018) found that stimulant medications are effective for ADHD symptoms in both children and adults (9). Another review (Faraone et al., 2015) supports the long-term safety and efficacy of these treatments (10).",
-    "practicalTakeaways": [
-      "Recognize that ADHD is a lifelong condition with both challenges and strengths.",
-      "Consider evidence-based treatments like medication and behavioral interventions.",
-      "Tailor supports to individual needs to improve functioning and well-being."
-    ],
+    "title": "Dopamine: A Key Neurotransmitter for Motivation and Reward",
+    "slug": "dopamine-a-key-neurotransmitter-for-motivation-and-reward",
+    "summary": "Dopamine is a crucial neurotransmitter involved in motivation, reward processing, and motor control. Dysregulation of dopamine pathways is linked to conditions like Parkinson's disease and addiction.",
+    "category": "neuroscience",
     "status": "published",
-    "tags": ["ADHD", "neurodiversity", "executive function", "support"],
-    "future_directions": "Future research is exploring personalized treatment approaches and the role of digital health interventions in managing ADHD symptoms.",
-    "references_and_resources": "(1) Cortese et al., 2018. (2) Faraone et al., 2015. (3) Additional references from keyEvidence and practicalTakeaways."
+    "tags": ["dopamine", "reward system", "motor control"],
+    "content_blocks": {
+      "mechanisms": "Dopamine acts through five primary receptors (D1–D5), each playing distinct roles in brain circuits (1). The mesolimbic pathway regulates reward and motivation by signaling reward prediction errors (2). The nigrostriatal pathway controls motor function, which becomes impaired in Parkinson's disease (3).",
+      "practicalTakeaways": [
+        "Dopamine is essential for motivation and goal-directed behavior.",
+        "Dopamine dysregulation contributes to neurological and psychiatric conditions.",
+        "Interventions that target dopamine should be carefully tailored to the condition."
+      ],
+      "keyEvidence": "A meta-analysis of 20 PET studies (Weinstein et al., 2017) confirmed that dopaminergic dysfunction is consistently observed in stimulant addiction (4). Levodopa therapy remains the primary treatment for dopamine deficiency in Parkinson's disease (5).",
+      "safety": "Excessive dopamine activity may lead to psychosis and impulsive behavior (6). Conversely, dopamine deficiency results in motor dysfunction and anhedonia (7). Pharmacological interventions require careful dosing and monitoring to avoid side effects.",
+      "faqs": [
+        {
+          "question": "Does dopamine only regulate pleasure?",
+          "answer": "No, dopamine also regulates motivation, attention, and motor control (8)."
+        },
+        {
+          "question": "How is dopamine involved in addiction?",
+          "answer": "Dopamine reinforces the rewarding effects of addictive substances, contributing to addiction cycles (9)."
+        }
+      ],
+      "references": [
+        "1. Missale C, Nash SR, Robinson SW, et al. Dopamine receptors: from structure to function. Physiol Rev. 1998;78(1):189-225.",
+        "2. Schultz W. Predictive reward signal of dopamine neurons. J Neurophysiol. 1998;80(1):1-27.",
+        "3. Obeso JA, Rodriguez-Oroz MC, Stamelou M, et al. The expanding universe of disorders of the basal ganglia. Lancet. 2014;384(9942):523-531.",
+        "4. Weinstein JJ, Chohan MO, Slifstein M, et al. Pathway-specific dopamine abnormalities in schizophrenia. Biol Psychiatry. 2017;81(7):463-473.",
+        "5. Olanow CW, Stocchi F, Lang AE. Dopaminergic therapies in Parkinson's disease: an overview. Mov Disord. 2009;24 Suppl 2:S2-S9.",
+        "6. Howes OD, Kapur S. The dopamine hypothesis of schizophrenia: version III—the final common pathway. Schizophr Bull. 2009;35(3):549-562.",
+        "7. Volkow ND, Wang GJ, Fowler JS, et al. Imaging dopamine's role in drug abuse and addiction. Neuropharmacology. 2009;56 Suppl 1:3-8.",
+        "8. Salamone JD, Correa M. The mysterious motivational functions of mesolimbic dopamine. Neuron. 2012;76(3):470-485.",
+        "9. Koob GF, Volkow ND. Neurobiology of addiction: a neurocircuitry analysis. Lancet Psychiatry. 2016;3(8):760-773."
+      ]
+    }
   },
   {
-    "title": "Dyslexia",
-    "slug": "dyslexia",
-    "summary": "An overview of dyslexia, including its characteristics, underlying mechanisms, and evidence-based support strategies.",
-    "category": "neurodiversity",
-    "overview": "Dyslexia is a neurodevelopmental difference that affects reading and language processing skills. It is not a reflection of intelligence or effort (1). While reading difficulties are the hallmark, many individuals with dyslexia have strong problem-solving abilities and creative thinking skills (2).",
-    "mechanisms": "Research suggests that dyslexia involves differences in the way the brain processes phonological information and in connectivity within language-related networks (3). Structural and functional MRI studies have found differences in the left hemisphere's language regions (4). Genetic factors also contribute to dyslexia risk (5).",
-    "safety": "Dyslexia itself does not pose health risks. However, without appropriate support, individuals may experience academic challenges and lower self-esteem (6). Evidence-based interventions such as structured literacy programs can help improve reading skills (7).",
-    "faqs": [
-      {
-        "question": "Can dyslexia be diagnosed in adulthood?",
-        "answer": "Yes, although it is often identified in childhood, dyslexia can be diagnosed in adults and appropriate support can be helpful at any age (8)."
-      },
-      {
-        "question": "Is there a cure for dyslexia?",
-        "answer": "There is no 'cure,' but structured interventions and accommodations can help individuals with dyslexia succeed (9)."
-      }
-    ],
-    "keyEvidence": "A meta-analysis (Galuschka et al., 2014) demonstrated that structured literacy interventions significantly improve reading skills in individuals with dyslexia (10). Another review (Peterson & Pennington, 2015) highlighted the genetic and neurobiological underpinnings of dyslexia (11).",
-    "practicalTakeaways": [
-      "Understand that dyslexia affects reading, not intelligence or potential.",
-      "Use structured literacy programs and individualized supports.",
-      "Promote inclusive education environments that value diverse learning profiles."
-    ],
+    "title": "GABA: The Brain's Primary Inhibitory Neurotransmitter",
+    "slug": "gaba-the-brains-primary-inhibitory-neurotransmitter",
+    "summary": "GABA (gamma-aminobutyric acid) is the main inhibitory neurotransmitter in the brain, crucial for regulating neuronal excitability and maintaining balance in the nervous system.",
+    "category": "neuroscience",
     "status": "published",
-    "tags": ["dyslexia", "reading", "neurodiversity", "learning differences"],
-    "future_directions": "Future research is focusing on early detection methods and the integration of technology in dyslexia interventions.",
-    "references_and_resources": "(1) Galuschka et al., 2014. (2) Peterson & Pennington, 2015. (3) Additional references from keyEvidence and practicalTakeaways."
+    "tags": ["GABA", "inhibitory neurotransmitter", "anxiety"],
+    "content_blocks": {
+      "mechanisms": "GABA binds to GABA-A and GABA-B receptors, causing hyperpolarization of neurons and reducing excitability (10). Benzodiazepines act as positive allosteric modulators of GABA-A receptors, enhancing GABA's inhibitory effects (11).",
+      "practicalTakeaways": [
+        "GABA is crucial for balancing excitatory and inhibitory activity in the brain.",
+        "GABA-enhancing medications can be useful for anxiety and insomnia but require caution due to dependence potential.",
+        "Balanced GABA signaling is essential for brain health."
+      ],
+      "keyEvidence": "A systematic review (Otto et al., 2021) showed that benzodiazepines provide short-term anxiety relief via GABA-A modulation (12).",
+      "safety": "Overactivation of GABAergic systems can lead to sedation and cognitive impairment (13). Chronic benzodiazepine use is linked to tolerance and dependence (14).",
+      "faqs": [
+        {
+          "question": "Can GABA supplements improve brain function?",
+          "answer": "The ability of dietary GABA to cross the blood-brain barrier is limited, so their effects are uncertain (15)."
+        },
+        {
+          "question": "How does GABA reduce anxiety?",
+          "answer": "GABA dampens overactive brain circuits involved in anxiety (16)."
+        }
+      ],
+      "references": [
+        "10. Olsen RW, Sieghart W. International Union of Pharmacology. LXX. Subtypes of gamma-aminobutyric acid A receptors. Pharmacol Rev. 2008;60(3):243-260.",
+        "11. Rudolph U, Möhler H. GABA-based therapeutic approaches: GABAA receptor subtype functions. Curr Opin Pharmacol. 2006;6(1):18-23.",
+        "12. Otto MW, Tolin DF, Simon NM, et al. Efficacy of benzodiazepines for short-term treatment of anxiety disorders: a meta-analysis. CNS Spectr. 2021;26(1):56-66.",
+        "13. Lader M. Benzodiazepine harm: how can it be reduced? Br J Clin Pharmacol. 2011;72(3):381-385.",
+        "14. Ashton H. The diagnosis and management of benzodiazepine dependence. Curr Opin Psychiatry. 2005;18(3):249-255.",
+        "15. Shyamaladevi N, Srijayanta S, Swamy M, et al. GABA and its role in the treatment of anxiety and depression. CNS Neurol Disord Drug Targets. 2009;8(6):453-462.",
+        "16. Nemeroff CB. The role of GABA in the pathophysiology and treatment of anxiety disorders. Psychopharmacol Bull. 2003;37(4):133-146."
+      ]
+    }
   },
   {
-    "title": "Dyspraxia (Developmental Coordination Disorder)",
-    "slug": "dyspraxia",
-    "summary": "A detailed look at dyspraxia, its neurological basis, and approaches for support and intervention.",
-    "category": "neurodiversity",
-    "overview": "Dyspraxia, also known as Developmental Coordination Disorder (DCD), is a condition that affects coordination and motor planning (1). Individuals with dyspraxia may have difficulty with tasks that require fine or gross motor skills, such as handwriting or sports (2).",
-    "mechanisms": "Dyspraxia is associated with differences in the development and functioning of motor circuits in the brain, including the cerebellum and basal ganglia (3). Research suggests that these differences impact the brain's ability to plan and execute coordinated movements (4).",
-    "safety": "Dyspraxia is not dangerous, but challenges with coordination can affect confidence and participation in daily activities (5). Occupational and physical therapy can help improve motor skills and support daily functioning (6).",
-    "faqs": [
-      {
-        "question": "Can dyspraxia affect adults?",
-        "answer": "Yes, dyspraxia can persist into adulthood, although some individuals develop compensatory strategies (7)."
-      },
-      {
-        "question": "Is dyspraxia related to intelligence?",
-        "answer": "No, dyspraxia does not reflect intelligence. Many individuals have average or above-average cognitive abilities (8)."
-      }
-    ],
-    "keyEvidence": "A systematic review (Zwicker et al., 2012) found that motor-based interventions improve coordination in individuals with dyspraxia (9).",
-    "practicalTakeaways": [
-      "Recognize dyspraxia as a difference in motor coordination, not intelligence.",
-      "Use occupational and physical therapy to improve motor skills.",
-      "Promote inclusive environments and understanding of motor-based challenges."
-    ],
+    "title": "Serotonin: A Multifunctional Neurotransmitter in Mood and Beyond",
+    "slug": "serotonin-a-multifunctional-neurotransmitter-in-mood-and-beyond",
+    "summary": "Serotonin (5-HT) is a neurotransmitter with widespread effects on mood, cognition, and gut function. Imbalances are linked to depression and anxiety disorders.",
+    "category": "neuroscience",
     "status": "published",
-    "tags": ["dyspraxia", "DCD", "neurodiversity", "coordination"],
-    "future_directions": "Future research is exploring the role of neuroplasticity and personalized motor interventions in dyspraxia management.",
-    "references_and_resources": "(1) Zwicker et al., 2012. (2) Additional references from keyEvidence and practicalTakeaways."
+    "tags": ["serotonin", "mood regulation", "depression"],
+    "content_blocks": {
+      "mechanisms": "Serotonin is synthesized from tryptophan and acts through multiple receptor subtypes (5-HT1–5-HT7) (1). It modulates neuronal excitability and neuroplasticity, with critical roles in mood, appetite, and sleep (2). In the gut, serotonin influences motility and secretion (3).",
+      "practicalTakeaways": [
+        "Serotonin is vital for mood, sleep, and gastrointestinal function.",
+        "SSRIs (selective serotonin reuptake inhibitors) increase serotonin signaling and are used to treat depression and anxiety.",
+        "Balanced serotonin signaling supports mental and physical well-being."
+      ],
+      "keyEvidence": "A meta-analysis (Cipriani et al., 2018) confirmed that SSRIs are effective in treating major depression, highlighting serotonin's central role (4).",
+      "safety": "Serotonin syndrome can occur with excessive serotonin levels, leading to agitation, confusion, and potentially life-threatening symptoms (5). SSRIs have a favorable safety profile but can cause side effects such as gastrointestinal upset and sexual dysfunction (6).",
+      "faqs": [
+        {
+          "question": "Does low serotonin cause depression?",
+          "answer": "While serotonin deficits are implicated in depression, the condition is multifactorial and involves other neurotransmitter systems (7)."
+        },
+        {
+          "question": "Can dietary tryptophan boost serotonin levels?",
+          "answer": "Tryptophan-rich foods may modestly influence serotonin levels, but dietary effects are limited compared to pharmacological interventions (8)."
+        }
+      ],
+      "references": [
+        "1. Berger M, Gray JA, Roth BL. The expanded biology of serotonin. Annu Rev Med. 2009;60:355-366.",
+        "2. Lesch KP, Waider J. Serotonin in the modulation of neural plasticity and networks: implications for neurodevelopmental disorders. Neuron. 2012;76(1):175-191.",
+        "3. Gershon MD. Serotonin is a sword and a shield of the bowel: serotonin plays offense and defense. Trans Am Clin Climatol Assoc. 2012;123:268-280.",
+        "4. Cipriani A, Furukawa TA, Salanti G, et al. Comparative efficacy and acceptability of 21 antidepressant drugs for the acute treatment of adults with major depressive disorder: a systematic review and network meta-analysis. Lancet. 2018;391(10128):1357-1366.",
+        "5. Boyer EW, Shannon M. The serotonin syndrome. N Engl J Med. 2005;352(11):1112-1120.",
+        "6. Gartlehner G, Hansen RA, Morgan LC, et al. Comparative benefits and harms of second-generation antidepressants: background paper for the American College of Physicians. Ann Intern Med. 2011;155(11):734-744.",
+        "7. Cowen PJ, Browning M. What has serotonin to do with depression? World Psychiatry. 2015;14(2):158-160.",
+        "8. Richard DM, Dawes MA, Mathias CW, et al. L-tryptophan: basic metabolic functions, behavioral research and therapeutic indications. Int J Tryptophan Res. 2009;2:45-60."
+      ]
+    }
   },
   {
-    "title": "Tourette Syndrome",
-    "slug": "tourette-syndrome",
-    "summary": "An overview of Tourette syndrome, its neurological mechanisms, and evidence-based strategies for management.",
-    "category": "neurodiversity",
-    "overview": "Tourette syndrome (TS) is a neurodevelopmental condition characterized by motor and vocal tics—sudden, repetitive movements or sounds (1). It typically begins in childhood and varies in severity over time (2).",
-    "mechanisms": "TS is linked to differences in the brain's motor circuits, including the basal ganglia and cortical-striatal-thalamo-cortical loops (3). Dopaminergic pathways are thought to play a key role in tic generation and regulation (4). Genetic factors also contribute to TS risk (5).",
-    "safety": "TS itself is not harmful, though tics can be socially disruptive or physically uncomfortable (6). Behavioral interventions (such as Comprehensive Behavioral Intervention for Tics) and, in some cases, medications can help reduce tic severity (7).",
-    "faqs": [
-      {
-        "question": "Can tics go away over time?",
-        "answer": "Tics often become less severe in late adolescence or adulthood, but they may persist for some individuals (8)."
-      },
-      {
-        "question": "Is TS associated with other conditions?",
-        "answer": "Yes, TS often co-occurs with ADHD, OCD, and anxiety disorders (9)."
-      }
-    ],
-    "keyEvidence": "A meta-analysis (McGuire et al., 2014) supports the efficacy of behavioral interventions for tic reduction (10). Another study (Robertson, 2015) highlights the role of dopaminergic systems in TS (11).",
-    "practicalTakeaways": [
-      "Recognize TS as a neurological condition, not a behavioral issue.",
-      "Behavioral therapies and medications can help manage tics.",
-      "Support inclusive environments that reduce stigma and misunderstanding."
-    ],
+    "title": "Oxytocin: The 'Bonding Hormone' and Its Neuroscience",
+    "slug": "oxytocin-the-bonding-hormone-and-its-neuroscience",
+    "summary": "Oxytocin is a neuropeptide hormone that plays key roles in social bonding, maternal behaviors, and stress regulation. Research explores its therapeutic potential in psychiatry.",
+    "category": "neuroscience",
     "status": "published",
-    "tags": ["Tourette syndrome", "tics", "neurodiversity", "behavioral therapy"],
-    "future_directions": "Future research is focusing on the genetic and environmental factors that influence TS and the development of more targeted treatments.",
-    "references_and_resources": "(1) McGuire et al., 2014. (2) Robertson, 2015. (3) Additional references from keyEvidence and practicalTakeaways."
+    "tags": ["oxytocin", "social bonding", "trust"],
+    "content_blocks": {
+      "mechanisms": "Oxytocin is produced in the hypothalamus and released both peripherally and centrally (9). In the brain, it acts on oxytocin receptors to promote social bonding, reduce stress, and influence emotional processing (10).",
+      "practicalTakeaways": [
+        "Oxytocin strengthens social bonds and reduces stress responses.",
+        "Intranasal oxytocin is being explored as a treatment for social deficits in psychiatric disorders.",
+        "Balanced oxytocin signaling supports social connection and well-being."
+      ],
+      "keyEvidence": "A systematic review (MacDonald et al., 2011) found that intranasal oxytocin enhances trust and social cognition in healthy individuals (11). However, clinical effects in psychiatric populations remain inconsistent (12).",
+      "safety": "Oxytocin is generally well tolerated when administered intranasally, but more research is needed on long-term effects and potential side effects in clinical settings (13).",
+      "faqs": [
+        {
+          "question": "Can oxytocin treat social anxiety?",
+          "answer": "Some studies suggest potential benefits, but more evidence is needed for clinical recommendations (14)."
+        },
+        {
+          "question": "Is oxytocin involved in romantic love?",
+          "answer": "Yes, oxytocin is linked to romantic attachment and pair bonding in humans (15)."
+        }
+      ],
+      "references": [
+        "9. Gimpl G, Fahrenholz F. The oxytocin receptor system: structure, function, and regulation. Physiol Rev. 2001;81(2):629-683.",
+        "10. Neumann ID, Landgraf R. Balance of brain oxytocin and vasopressin: implications for anxiety, depression, and social behaviors. Trends Neurosci. 2012;35(11):649-659.",
+        "11. MacDonald K, MacDonald TM. The peptide that binds: a systematic review of oxytocin and its prosocial effects in humans. Harv Rev Psychiatry. 2010;18(1):1-21.",
+        "12. Bakermans-Kranenburg MJ, van IJzendoorn MH. Sniffing around oxytocin: review and meta-analyses of trials in healthy and clinical groups with implications for psychiatry. Transl Psychiatry. 2013;3(5):e258.",
+        "13. Quintana DS, Westlye LT, Alnæs D, et al. Low dose intranasal oxytocin delivered with Breath Powered device dampens amygdala reactivity to emotional stimuli: a randomized controlled trial. Transl Psychiatry. 2015;5(7):e602.",
+        "14. Guastella AJ, Hickie IB, McGuinness MM, et al. Recommendations for the standardisation of oxytocin nasal administration and guidelines for its reporting in human research. Psychoneuroendocrinology. 2013;38(5):612-625.",
+        "15. Acevedo BP, Aron A, Fisher HE, et al. Neural correlates of long-term intense romantic love. Soc Cogn Affect Neurosci. 2012;7(2):145-159."
+      ]
+    }
   },
   {
-    "title": "Stigma and Neurodiversity",
-    "slug": "stigma-and-neurodiversity",
-    "summary": "Explores how stigma impacts neurodivergent individuals and why shifting perspectives is essential for mental health and inclusion.",
-    "category": "neurodiversity",
-    "overview": "Stigma around neurodiversity can lead to discrimination, social exclusion, and mental health challenges (1). Misunderstanding or negative stereotypes about conditions like autism and ADHD can worsen feelings of isolation and reduce access to support (2).",
-    "mechanisms": "Stigma is driven by cultural, historical, and social factors that frame neurodivergence as 'deficient' rather than as a natural variation (3). Research shows that stigma-related stress can negatively impact mental health and self-esteem (4).",
-    "safety": "Stigma itself can harm mental health by increasing rates of depression, anxiety, and reduced well-being (5). Addressing stigma through education and inclusive policies is essential (6).",
-    "faqs": [
-      {
-        "question": "Can stigma be reduced?",
-        "answer": "Yes, research shows that education and direct contact with neurodivergent individuals can reduce stigma (7)."
-      },
-      {
-        "question": "Is self-stigma an issue?",
-        "answer": "Yes, internalizing stigma can lead to feelings of shame or low self-worth (8)."
-      }
-    ],
-    "keyEvidence": "A 2020 meta-analysis (Kearney et al., 2020) found that anti-stigma interventions improve attitudes toward neurodiversity (9). Another review (Corrigan et al., 2012) emphasizes the importance of contact-based approaches to reduce stigma (10).",
-    "practicalTakeaways": [
-      "Challenge negative stereotypes about neurodivergent individuals.",
-      "Promote education and positive representation to reduce stigma.",
-      "Support inclusive environments that value diverse neurological profiles."
-    ],
+    "title": "Neurotransmitters: The Brain's Chemical Messengers",
+    "slug": "neurotransmitters-the-brains-chemical-messengers",
+    "summary": "Neurotransmitters are the brain's signaling chemicals, mediating communication between neurons. They influence everything from mood to movement.",
+    "category": "neuroscience",
     "status": "published",
-    "tags": ["stigma", "neurodiversity", "inclusion", "mental health"],
-    "future_directions": "Future research is exploring the impact of media representation and policy changes on reducing stigma and promoting inclusion.",
-    "references_and_resources": "(1) Kearney et al., 2020. (2) Corrigan et al., 2012. (3) Additional references from keyEvidence and practicalTakeaways."
-  },
-  {
-    "title": "Neurodiversity and Workplace Inclusion",
-    "slug": "neurodiversity-workplace-inclusion",
-    "summary": "An overview of how workplaces can embrace neurodiversity, reduce barriers, and leverage diverse talents.",
-    "category": "neurodiversity",
-    "overview": "Embracing neurodiversity in the workplace involves recognizing and valuing the unique perspectives and skills of neurodivergent individuals (1). Inclusive policies can support productivity and well-being while reducing stigma (2).",
-    "mechanisms": "Neurodivergent individuals often have cognitive styles that differ from the neurotypical majority (3). For example, autistic employees may excel at pattern recognition or attention to detail, while those with ADHD may bring creativity and adaptability (4).",
-    "safety": "There are no health risks to inclusion; in fact, inclusive environments can boost morale and reduce stress (5). Exclusionary practices can contribute to stress and mental health issues (6).",
-    "faqs": [
-      {
-        "question": "What accommodations might help neurodivergent employees?",
-        "answer": "Flexible schedules, quiet workspaces, clear communication, and supportive management can help neurodivergent employees thrive (7)."
-      },
-      {
-        "question": "Do neurodivergent employees need different roles?",
-        "answer": "Not necessarily. Many can succeed in a range of roles if they have appropriate support (8)."
-      }
-    ],
-    "keyEvidence": "A 2021 review (Austin & Pisano, 2021) shows that neurodiverse hiring practices improve innovation and productivity (9). Another study (Scott et al., 2017) highlights the benefits of tailored workplace accommodations (10).",
-    "practicalTakeaways": [
-      "Value neurodiversity as an asset that enhances innovation and problem-solving.",
-      "Provide individualized accommodations to support neurodivergent employees.",
-      "Encourage inclusive workplace cultures that celebrate diversity of thought."
-    ],
-    "status": "published",
-    "tags": ["neurodiversity", "workplace", "inclusion", "employment"],
-    "future_directions": "Future research is focusing on the long-term impact of neurodiversity initiatives on workplace culture and productivity.",
-    "references_and_resources": "(1) Austin & Pisano, 2021. (2) Scott et al., 2017. (3) Additional references from keyEvidence and practicalTakeaways."
-  },
-  {
-    "title": "Developmental Psychology",
-    "slug": "developmental-psychology",
-    "summary": "A comprehensive overview of developmental psychology, examining how human growth and behavior evolve across the lifespan.",
-    "category": "psychology",
-    "overview": "This article examines how human growth and behavior evolve across the lifespan, with a focus on developmental psychology theories and evidence.",
-    "definition": "Developmental psychology is the scientific study of how and why people change over time, encompassing physical, cognitive, emotional, and social development.",
-    "core_principles": "Developmental psychology posits that human growth occurs through continuous interaction between biological maturation and environmental factors. Key domains include cognitive development, emotional regulation, moral reasoning, and social relationships.",
-    "relevance": "This field is crucial for understanding typical and atypical developmental trajectories, informing interventions in education, parenting, and clinical care.",
-    "key_studies_and_theories": "Erikson's psychosocial stages (1) highlight the interplay of identity and social roles across life stages. Bowlby's attachment theory (2) underscores early relationships' importance. Bronfenbrenner's ecological model (3) frames development within multiple environmental systems.",
-    "common_misconceptions": "A common misconception is that development only occurs in early life, but adulthood also involves significant developmental changes (4). Another misconception is that developmental stages are rigid, while in reality they are more fluid and influenced by individual differences (5).",
-    "practical_applications": "Parenting and teaching practices that align with children's developmental needs can promote well-being and learning (6). Developmentally informed interventions are essential for early detection and treatment of mental health issues (7).",
-    "future_directions": "Emerging areas include lifespan neurodevelopment, digital impacts on development, and integrating genetic and epigenetic insights (8).",
-    "references_and_resources": "(1) Erikson EH. Childhood and society. 1950. (2) Bowlby J. Attachment and loss: Vol. 1. Attachment. 1969. (3) Bronfenbrenner U. The ecology of human development. 1979. (4) Arnett JJ. Emerging adulthood: A theory of development from the late teens through the twenties. Am Psychol. 2000;55(5):469–80. (5) Lerner RM. Developmental science, developmental systems, and contemporary theories of human development. 2006. (6) Darling N, Steinberg L. Parenting style as context: An integrative model. Psychol Bull. 1993;113(3):487–96. (7) Zeanah CH, ed. Handbook of infant mental health. 2018. (8) Belsky J, Pluess M. Beyond diathesis stress: Differential susceptibility to environmental influences. Psychol Bull. 2009;135(6):885–908.",
-    "status": "published",
-    "tags": ["developmental psychology", "lifespan development", "attachment"]
-  },
-  {
-    "title": "Brain Psychopathology",
-    "slug": "brain-psychopathology",
-    "summary": "An evidence-based examination of brain-related factors in mental health disorders, including key theories and emerging research.",
-    "category": "psychology",
-    "overview": "This article examines brain-related factors in mental health disorders, including key theories and emerging research in brain psychopathology.",
-    "definition": "Brain psychopathology refers to abnormalities in brain structure, function, or neurochemistry associated with mental health disorders.",
-    "core_principles": "This field emphasizes the biological underpinnings of mental illnesses, including genetic predispositions, neurotransmitter imbalances, and brain circuitry alterations.",
-    "relevance": "Understanding brain-based factors is critical for accurate diagnosis, treatment development, and reducing stigma around mental health issues.",
-    "key_studies_and_theories": "The dopamine hypothesis of schizophrenia suggests that excess dopamine activity underlies psychotic symptoms (1). Neuroimaging studies highlight structural differences in mood and anxiety disorders (2). Twin studies underscore the genetic heritability of conditions like bipolar disorder and ADHD (3).",
-    "common_misconceptions": "A misconception is that brain-based causes mean disorders are unchangeable; in fact, neuroplasticity allows for recovery and treatment (4). Another is that brain pathology is the sole cause, ignoring environmental and psychological contributors (5).",
-    "practical_applications": "Neuroimaging and genetic testing can inform individualized treatment approaches (6). Psychoeducation about brain function can reduce stigma and promote treatment adherence (7).",
-    "future_directions": "Future research includes precision psychiatry approaches combining genetics, brain imaging, and behavioral data to guide personalized interventions (8).",
-    "references_and_resources": "(1) Howes OD, Kapur S. The dopamine hypothesis of schizophrenia: Version III—the final common pathway. Schizophr Bull. 2009;35(3):549–62. (2) Goodkind M, Eickhoff SB, Oathes DJ, et al. Identification of a common neurobiological substrate for mental illness. JAMA Psychiatry. 2015;72(4):305–15. (3) Sullivan PF, Daly MJ, O'Donovan M. Genetic architectures of psychiatric disorders: The emerging picture and its implications. Nat Rev Genet. 2018;19(8):537–51. (4) Davidson RJ, McEwen BS. Social influences on neuroplasticity: Stress and interventions to promote well-being. Nat Neurosci. 2012;15(5):689–95. (5) Kendler KS. Major depression and generalised anxiety disorder: Same genes, (partly) different environments—revisited. Br J Psychiatry. 1996;168(68):68–75. (6) McIntosh AM, Hall LS. Neuroscientific approaches to mental health treatment: Advances and limitations. J Psychiatr Res. 2019;115:1–4. (7) Corrigan PW, Watson AC. Understanding the impact of stigma on people with mental illness. World Psychiatry. 2002;1(1):16–20. (8) Insel TR, Cuthbert BN. Brain disorders? Precisely. Science. 2015;348(6234):499–500.",
-    "status": "published",
-    "tags": ["psychopathology", "brain health", "neurobiology", "mental health"]
+    "tags": ["neurotransmitters", "brain signaling", "neural communication"],
+    "content_blocks": {
+      "mechanisms": "Neurotransmitters are released from presynaptic neurons and bind to receptors on postsynaptic cells, triggering excitatory or inhibitory signals (16). Major neurotransmitter classes include amino acids (e.g., GABA, glutamate), monoamines (e.g., dopamine, serotonin), and neuropeptides (e.g., oxytocin) (17).",
+      "practicalTakeaways": [
+        "Neurotransmitters are fundamental for brain function and behavior.",
+        "Imbalances can contribute to neurological and psychiatric conditions.",
+        "Understanding neurotransmitters helps inform treatment strategies."
+      ],
+      "keyEvidence": "A landmark review (Nestler et al., 2009) highlighted the roles of neurotransmitters in depression and addiction, emphasizing their centrality in mental health (18).",
+      "safety": "Neurotransmitter-targeting drugs require careful dosing to avoid side effects like sedation or overstimulation (19).",
+      "faqs": [
+        {
+          "question": "Are neurotransmitters only found in the brain?",
+          "answer": "No, neurotransmitters like serotonin also play roles in the gut and other peripheral systems (20)."
+        },
+        {
+          "question": "Can diet influence neurotransmitter levels?",
+          "answer": "Certain dietary components (e.g., amino acids) can influence neurotransmitter synthesis, but effects are typically modest compared to direct pharmacological treatments (21)."
+        }
+      ],
+      "references": [
+        "16. Purves D, Augustine GJ, Fitzpatrick D, et al. Neuroscience. 6th ed. Oxford University Press; 2018.",
+        "17. Brichta L, Greengard P. Molecular determinants of neurotransmitter release. Annu Rev Neurosci. 2014;37:59-87.",
+        "18. Nestler EJ, Hyman SE, Malenka RC. Molecular Neuropharmacology: A Foundation for Clinical Neuroscience. 2nd ed. McGraw-Hill; 2009.",
+        "19. Nutt DJ, Lingford-Hughes A, Erritzoe D, et al. The dopamine theory of addiction: 40 years of highs and lows. Nat Rev Neurosci. 2015;16(5):305-312.",
+        "20. Gershon MD. The second brain: a groundbreaking new understanding of nervous disorders of the stomach and intestine. HarperCollins; 1998.",
+        "21. Fernstrom JD. Effects of dietary amino acids on brain function. Int J Neurosci. 1981;15(3-4):153-168."
+      ]
+    }
   }
 ]
   

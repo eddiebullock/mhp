@@ -184,6 +184,18 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
                       {article.title}
                     </h2>
                     <p className="text-gray-600 mb-4">{article.summary}</p>
+                    {article.content_blocks?.mechanisms && (
+                      <div className="mb-4">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Mechanisms</h3>
+                        <p className="text-gray-600">{article.content_blocks.mechanisms}</p>
+                      </div>
+                    )}
+                    {article.content_blocks?.practical_takeaways && (
+                      <div className="mb-4">
+                        <h3 className="text-lg font-medium text-gray-900 mb-2">Practical Takeaways</h3>
+                        <p className="text-gray-600">{article.content_blocks.practical_takeaways}</p>
+                      </div>
+                    )}
                     <div className="flex flex-wrap gap-2 mb-4">
                       {(article.tags || []).map((tag, index) => (
                         <span

@@ -191,32 +191,7 @@ async function main() {
               category: article.category,
               status: article.status || 'draft',
               tags: article.tags || [],
-              content_blocks: {
-                overview: article.overview,
-                definition: article.definition,
-                mechanisms: article.mechanisms,
-                prevalence: article.prevalence,
-                causes_and_mechanisms: article.causes_and_mechanisms,
-                symptoms_and_impact: article.symptoms_and_impact,
-                evidence_summary: article.evidence_summary,
-                common_myths: article.common_myths,
-                practical_takeaways: article.practical_takeaways,
-                future_directions: article.future_directions,
-                references_and_resources: article.references_and_resources,
-                relevance: article.relevance,
-                key_studies: article.key_studies,
-                common_misconceptions: article.common_misconceptions,
-                practical_implications: article.practical_implications,
-                effectiveness: article.effectiveness,
-                risks_and_limitations: article.risks_and_limitations,
-                how_it_works: article.how_it_works,
-                applications: article.applications,
-                strengths_and_limitations: article.strengths_and_limitations,
-                evidence_base: article.evidence_base,
-                practical_applications: article.practical_applications,
-                core_principles: article.core_principles,
-                key_studies_and_theories: article.key_studies_and_theories
-              }
+              content_blocks: article.content_blocks || {}
             };
 
         if (!validateArticle(transformedArticle)) {
