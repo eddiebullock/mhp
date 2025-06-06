@@ -104,88 +104,42 @@ type Article = MentalHealthArticle | NeuroscienceArticle | PsychologyArticle |
               NeurodiversityArticle | InterventionArticle | LabTestingArticle;
 
 // Validate article data
-function validateArticle(article: any): article is Article {
-  const requiredBaseFields = ['title', 'slug', 'summary', 'category', 'overview', 'status', 'tags'];
-  const hasAllBaseFields = requiredBaseFields.every(field => field in article);
+function validateArticle(article: any): boolean {
+  const requiredFields = ['title', 'slug', 'summary', 'category'];
+  const hasRequiredFields = requiredFields.every(field => article[field]);
   
-  if (!hasAllBaseFields) {
-    console.error(`Missing required base fields in article: ${article.title}`);
+  if (!hasRequiredFields) {
+    console.error('Missing required fields:', requiredFields.filter(field => !article[field]));
     return false;
   }
 
-  if (!['published', 'draft', 'archived'].includes(article.status)) {
-    console.error(`Invalid status for article: ${article.title}`);
+  if (!article.content_blocks) {
+    console.error('Missing content_blocks');
     return false;
   }
 
-  if (!Array.isArray(article.tags)) {
-    console.error(`Tags must be an array for article: ${article.title}`);
-    return false;
-  }
-
-  // Validate category-specific fields
-  switch (article.category) {
-    case 'mental_health':
-      const mentalHealthFields = ['prevalence', 'causes_and_mechanisms', 'symptoms_and_impact', 
-                                'evidence_summary', 'practical_takeaways', 'common_myths'];
-      return mentalHealthFields.every(field => field in article);
-
-    case 'neuroscience':
-    case 'brain_health':
-      const neuroscienceFields = ['definition', 'mechanisms', 'relevance', 'key_studies', 
-                                'common_misconceptions', 'practical_implications'];
-      return neuroscienceFields.every(field => field in article);
-
-    case 'psychology':
-      const psychologyFields = ['definition', 'core_principles', 'relevance', 
-                              'key_studies_and_theories', 'common_misconceptions', 
-                              'practical_applications'];
-      return psychologyFields.every(field => field in article);
-
-    case 'neurodiversity':
-      const neurodiversityFields = ['neurodiversity_perspective', 'common_strengths_and_challenges',
-                                  'prevalence_and_demographics', 'mechanisms_and_understanding',
-                                  'evidence_summary', 'common_misconceptions', 'practical_takeaways',
-                                  'lived_experience'];
-      return neurodiversityFields.every(field => field in article);
-
-    case 'interventions':
-      const interventionFields = ['how_it_works', 'evidence_base', 'effectiveness', 
-                                'practical_applications', 'common_myths', 'risks_and_limitations'];
-      return interventionFields.every(field => field in article);
-
-    case 'lifestyle_factors':
-      const lifestyleFields = ['mechanisms', 'evidence_summary', 'practical_takeaways', 
-                             'risks_and_limitations', 'future_directions'];
-      return lifestyleFields.every(field => field in article);
-
-    case 'lab_testing':
-      const labTestingFields = ['how_it_works', 'applications', 'strengths_and_limitations', 
-                               'risks_and_limitations', 'future_directions'];
-      return labTestingFields.every(field => field in article);
-
-    default:
-      console.error(`Invalid category for article: ${article.title}`);
-      return false;
-  }
+  return true;
 }
 
 // Transform neurodiversity article to match required schema
 function transformNeurodiversityArticle(article: any) {
   return {
-    ...article,
-    neurodiversity_perspective: article.overview,
-    common_strengths_and_challenges: article.mechanisms,
-    prevalence_and_demographics: article.mechanisms,
-    mechanisms_and_understanding: article.mechanisms,
-    evidence_summary: article.keyEvidence || article.mechanisms,
-    common_misconceptions: article.mechanisms,
-    practical_takeaways: Array.isArray(article.practicalTakeaways) 
-      ? article.practicalTakeaways.join('\n\n')
-      : article.mechanisms,
-    lived_experience: article.overview,
-    future_directions: article.future_directions || 'No future directions available.',
-    references_and_resources: article.references_and_resources || 'References coming soon.'
+    title: article.title,
+    slug: article.slug,
+    summary: article.summary,
+    category: article.category,
+    status: article.status || 'draft',
+    tags: article.tags || [],
+    content_blocks: {
+      overview: article.overview,
+      neurodiversity_perspective: article.overview,
+      common_strengths_and_challenges: article.common_strengths_and_challenges || article.mechanisms,
+      prevalence_and_demographics: article.prevalence_and_demographics || article.mechanisms,
+      mechanisms_and_understanding: article.mechanisms_and_understanding || article.mechanisms,
+      lived_experience: article.overview,
+      future_directions: article.future_directions || "No future directions available.",
+      references_and_resources: article.references_and_resources || "References coming soon."
+    }
   };
 }
 
@@ -230,7 +184,40 @@ async function main() {
         // Transform neurodiversity articles
         const transformedArticle = article.category === 'neurodiversity' 
           ? transformNeurodiversityArticle(article)
-          : article;
+          : {
+              title: article.title,
+              slug: article.slug,
+              summary: article.summary,
+              category: article.category,
+              status: article.status || 'draft',
+              tags: article.tags || [],
+              content_blocks: {
+                overview: article.overview,
+                definition: article.definition,
+                mechanisms: article.mechanisms,
+                prevalence: article.prevalence,
+                causes_and_mechanisms: article.causes_and_mechanisms,
+                symptoms_and_impact: article.symptoms_and_impact,
+                evidence_summary: article.evidence_summary,
+                common_myths: article.common_myths,
+                practical_takeaways: article.practical_takeaways,
+                future_directions: article.future_directions,
+                references_and_resources: article.references_and_resources,
+                relevance: article.relevance,
+                key_studies: article.key_studies,
+                common_misconceptions: article.common_misconceptions,
+                practical_implications: article.practical_implications,
+                effectiveness: article.effectiveness,
+                risks_and_limitations: article.risks_and_limitations,
+                how_it_works: article.how_it_works,
+                applications: article.applications,
+                strengths_and_limitations: article.strengths_and_limitations,
+                evidence_base: article.evidence_base,
+                practical_applications: article.practical_applications,
+                core_principles: article.core_principles,
+                key_studies_and_theories: article.key_studies_and_theories
+              }
+            };
 
         if (!validateArticle(transformedArticle)) {
           console.error(`Validation failed for article: ${article.title}`);
@@ -239,62 +226,34 @@ async function main() {
         }
 
         try {
-          // Whitelist of allowed fields for upsert
-          const allowedFields = [
-            'title', 'slug', 'summary', 'category', 'overview', 'future_directions',
-            'references_and_resources', 'status', 'tags', 'prevalence', 'causes_and_mechanisms',
-            'symptoms_and_impact', 'evidence_summary', 'practical_takeaways', 'common_myths',
-            'definition', 'mechanisms', 'relevance', 'key_studies', 'common_misconceptions',
-            'practical_implications', 'core_principles', 'key_studies_and_theories',
-            'practical_applications', 'neurodiversity_perspective', 'common_strengths_and_challenges',
-            'prevalence_and_demographics', 'mechanisms_and_understanding', 'lived_experience',
-            'how_it_works', 'evidence_base', 'effectiveness', 'risks_and_limitations',
-            'applications', 'strengths_and_limitations'
-          ];
-          const articleData = Object.fromEntries(
-            Object.entries(transformedArticle).filter(([key]) => allowedFields.includes(key))
-          );
-
           const { error } = await supabase
             .from('articles')
             .upsert({
               id: uuidv4(),
-              ...articleData,
+              ...transformedArticle,
               created_at: new Date().toISOString(),
               updated_at: new Date().toISOString(),
             }, {
               onConflict: 'slug'
             });
 
-          if (error) {
-            console.error(`Error inserting article "${article.title}":`, error.message);
-            errorCount++;
-          } else {
-            console.log(`Successfully inserted: ${article.title}`);
-            successCount++;
-          }
+          if (error) throw error;
+          successCount++;
         } catch (error) {
-          console.error(`Unexpected error for article "${article.title}":`, error);
+          console.error(`Error upserting article ${article.title}:`, error);
           errorCount++;
         }
       }
-
-      // Add a small delay between batches to avoid rate limiting
-      if (batchIndex < batches.length - 1) {
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      }
     }
 
-    console.log('\nUpload Summary:');
-    console.log(`Total articles: ${articles.length}`);
-    console.log(`Successfully uploaded: ${successCount}`);
-    console.log(`Failed: ${errorCount}`);
+    console.log(`\nUpload complete!`);
+    console.log(`Successfully uploaded: ${successCount} articles`);
+    console.log(`Failed to upload: ${errorCount} articles`);
 
   } catch (error) {
-    console.error('Fatal error:', error);
+    console.error('Error:', error);
     process.exit(1);
   }
 }
-
 
 main().catch(console.error); 

@@ -16,18 +16,40 @@ export interface Database {
           title: string
           slug: string
           summary: string
-          content: string
           category: string
           status: 'published' | 'draft'
-          author_id: string
           tags: string[]
-          overview: string
-          definition: string
-          mechanisms: string
-          clinical_implications: string
-          research_highlights: string
-          key_concepts: string[]
-          references: string[]
+          content_blocks: {
+            overview?: string
+            definition?: string
+            mechanisms?: string
+            prevalence?: string
+            causes_and_mechanisms?: string
+            symptoms_and_impact?: string
+            evidence_summary?: string
+            common_myths?: string
+            practical_takeaways?: string
+            future_directions?: string
+            references_and_resources?: string
+            relevance?: string
+            key_studies?: string
+            common_misconceptions?: string
+            practical_implications?: string
+            effectiveness?: string
+            risks_and_limitations?: string
+            how_it_works?: string
+            applications?: string
+            strengths_and_limitations?: string
+            evidence_base?: string
+            practical_applications?: string
+            neurodiversity_perspective?: string
+            common_strengths_and_challenges?: string
+            prevalence_and_demographics?: string
+            mechanisms_and_understanding?: string
+            lived_experience?: string
+            core_principles?: string
+            key_studies_and_theories?: string
+          }
         }
         Insert: {
           id?: string
@@ -35,18 +57,40 @@ export interface Database {
           title: string
           slug: string
           summary: string
-          content: string
           category: string
           status?: 'published' | 'draft'
-          author_id: string
           tags?: string[]
-          overview?: string
-          definition?: string
-          mechanisms?: string
-          clinical_implications?: string
-          research_highlights?: string
-          key_concepts?: string[]
-          references?: string[]
+          content_blocks?: {
+            overview?: string
+            definition?: string
+            mechanisms?: string
+            prevalence?: string
+            causes_and_mechanisms?: string
+            symptoms_and_impact?: string
+            evidence_summary?: string
+            common_myths?: string
+            practical_takeaways?: string
+            future_directions?: string
+            references_and_resources?: string
+            relevance?: string
+            key_studies?: string
+            common_misconceptions?: string
+            practical_implications?: string
+            effectiveness?: string
+            risks_and_limitations?: string
+            how_it_works?: string
+            applications?: string
+            strengths_and_limitations?: string
+            evidence_base?: string
+            practical_applications?: string
+            neurodiversity_perspective?: string
+            common_strengths_and_challenges?: string
+            prevalence_and_demographics?: string
+            mechanisms_and_understanding?: string
+            lived_experience?: string
+            core_principles?: string
+            key_studies_and_theories?: string
+          }
         }
         Update: {
           id?: string
@@ -54,18 +98,40 @@ export interface Database {
           title?: string
           slug?: string
           summary?: string
-          content?: string
           category?: string
           status?: 'published' | 'draft'
-          author_id?: string
           tags?: string[]
-          overview?: string
-          definition?: string
-          mechanisms?: string
-          clinical_implications?: string
-          research_highlights?: string
-          key_concepts?: string[]
-          references?: string[]
+          content_blocks?: {
+            overview?: string
+            definition?: string
+            mechanisms?: string
+            prevalence?: string
+            causes_and_mechanisms?: string
+            symptoms_and_impact?: string
+            evidence_summary?: string
+            common_myths?: string
+            practical_takeaways?: string
+            future_directions?: string
+            references_and_resources?: string
+            relevance?: string
+            key_studies?: string
+            common_misconceptions?: string
+            practical_implications?: string
+            effectiveness?: string
+            risks_and_limitations?: string
+            how_it_works?: string
+            applications?: string
+            strengths_and_limitations?: string
+            evidence_base?: string
+            practical_applications?: string
+            neurodiversity_perspective?: string
+            common_strengths_and_challenges?: string
+            prevalence_and_demographics?: string
+            mechanisms_and_understanding?: string
+            lived_experience?: string
+            core_principles?: string
+            key_studies_and_theories?: string
+          }
         }
       }
       categories: {

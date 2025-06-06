@@ -93,9 +93,9 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
         query = query.or(`
           title.ilike.%${searchQuery}%,
           summary.ilike.%${searchQuery}%,
-          overview.ilike.%${searchQuery}%,
-          definition.ilike.%${searchQuery}%,
-          mechanisms.ilike.%${searchQuery}%
+          content_blocks->>'overview'.ilike.%${searchQuery}%,
+          content_blocks->>'definition'.ilike.%${searchQuery}%,
+          content_blocks->>'mechanisms'.ilike.%${searchQuery}%
         `);
       }
 

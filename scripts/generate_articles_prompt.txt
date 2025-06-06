@@ -146,14 +146,14 @@ Title: Clear, engaging, and informative.
 Slug: Lowercase, hyphen-separated version of the title.
 Summary: 1–2 sentence summary emphasizing key takeaways.
 category_id: Use the topic name (e.g., "neuroplasticity").
-content.overview: 2–3 paragraphs explaining the topic’s significance and context.
-content.mechanisms: Describe biological or psychological processes in plain language, citing relevant studies (e.g., “A 2022 systematic review (Smith et al., 2022) showed…”).
+content.overview: 2–3 paragraphs explaining the topic's significance and context.
+content.mechanisms: Describe biological or psychological processes in plain language, citing relevant studies (e.g., "A 2022 systematic review (Smith et al., 2022) showed…").
 content.safety: Discuss any risks, side effects, or limitations of the intervention.
 content.faqs: Provide 2 FAQs with evidence-based answers.
-content.keyEvidence: Summarize the most reputable studies (including citations, e.g., “A meta-analysis of 15 RCTs (Johnson et al., 2021) found…”).
+content.keyEvidence: Summarize the most reputable studies (including citations, e.g., "A meta-analysis of 15 RCTs (Johnson et al., 2021) found…").
 content.practicalTakeaways: Provide 2–3 bullet points with actionable advice for readers, grounded in the evidence.
 tags: Relevant keywords.
-status: Always “published.”
+status: Always "published."
 
 Tone and style:
 
@@ -184,11 +184,11 @@ Citation stle: Vancouver (numerical)
     "summary": "A deep dive into how your brain can rewire itself throughout life.",
     "category_id": "neuroplasticity",
     "content": {
-      "overview": "Neuroplasticity is the brain’s ability to adapt and change throughout life...",
+      "overview": "Neuroplasticity is the brain's ability to adapt and change throughout life...",
       "mechanisms": "Neurons form new connections in response to learning and experience...",
       "safety": "Generally safe; overexertion or unbalanced practices may be counterproductive...",
       "faqs": [
-        { "question": "Can neuroplasticity help recovery after injury?", "answer": "Yes, it’s key in rehabilitation." },
+        { "question": "Can neuroplasticity help recovery after injury?", "answer": "Yes, it's key in rehabilitation." },
         { "question": "Does neuroplasticity decrease with age?", "answer": "It slows down but remains present throughout life." }
       ],
       "keyEvidence": "Research in stroke patients shows significant improvement through targeted exercises...",
@@ -205,7 +205,7 @@ Citation stle: Vancouver (numerical)
 ### 🔎 **Additional refinements you might consider:**
 
 ✅ **Request specific citation styles**  
-If you want them in APA, MLA, or just “(Author, Year)” style, clarify in the prompt.
+If you want them in APA, MLA, or just "(Author, Year)" style, clarify in the prompt.
 
 ✅ **Clarify publication dates**  
 E.g., "Include at least one study published after 2020 if possible."
