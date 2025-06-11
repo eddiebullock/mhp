@@ -104,6 +104,20 @@ export default async function ArticlePage({ params }: { params: { slug: string }
 
     return (
       <div className="prose max-w-none">
+        {blocks.key_evidence && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Key Evidence</h2>
+            <ReactMarkdown>{blocks.key_evidence}</ReactMarkdown>
+          </section>
+        )}
+
+        {blocks.practical_takeaways && (
+          <section className="mb-8">
+            <h2 className="text-2xl font-bold mb-4">Practical Takeaways</h2>
+            <ReactMarkdown>{blocks.practical_takeaways}</ReactMarkdown>
+          </section>
+        )}
+
         {blocks.overview && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Overview</h2>
@@ -157,21 +171,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Common Myths</h2>
             <ReactMarkdown>{blocks.common_myths}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.practicalTakeaways && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Practical Takeaways</h2>
-            <div className="space-y-2">
-              {Array.isArray(blocks.practicalTakeaways) ? (
-                blocks.practicalTakeaways.map((takeaway: string, index: number) => (
-                  <p key={index} className="text-gray-600">{takeaway}</p>
-                ))
-              ) : (
-                <ReactMarkdown>{blocks.practicalTakeaways}</ReactMarkdown>
-              )}
-            </div>
           </section>
         )}
 
@@ -312,13 +311,6 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Key Studies and Theories</h2>
             <ReactMarkdown>{blocks.key_studies_and_theories}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.keyEvidence && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Key Evidence</h2>
-            <ReactMarkdown>{blocks.keyEvidence}</ReactMarkdown>
           </section>
         )}
 
