@@ -6,18 +6,13 @@ export default async function ArticlesPage() {
   
   const { data: articles, error } = await supabase
     .from('articles')
-    .select(`
-      *,
-      categories (
-        name
-      )
-    `)
+    .select('*')
     .eq('status', 'published')
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching articles:', error);
-    return <div>Error loading articles</div>;
+    console.error('Error fetching articles:', JSON.stringify(error, null, 2));
+    return <div>Error loading articles: {error.message || JSON.stringify(error)}</div>;
   }
 
   return (

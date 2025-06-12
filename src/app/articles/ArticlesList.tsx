@@ -207,7 +207,7 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
                       ))}
                     </div>
                     <div className="flex items-center text-sm text-gray-500">
-                      <span className="capitalize">Category: {article.category || 'Uncategorized'}</span>
+                      <span className="capitalize">Category: {article.category?.replace(/_/g, ' ') || 'Uncategorized'}</span>
                       <span className="mx-2">•</span>
                       <span>Published: {new Date(article.created_at).toLocaleDateString()}</span>
                     </div>

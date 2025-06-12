@@ -181,122 +181,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </section>
         )}
 
-        {blocks.references_and_resources && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">References and Resources</h2>
-            <ReactMarkdown>{blocks.references_and_resources}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.relevance && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Relevance</h2>
-            <ReactMarkdown>{blocks.relevance}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.key_studies && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Key Studies</h2>
-            <ReactMarkdown>{blocks.key_studies}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.common_misconceptions && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Common Misconceptions</h2>
-            <ReactMarkdown>{blocks.common_misconceptions}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.practical_implications && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Practical Implications</h2>
-            <ReactMarkdown>{blocks.practical_implications}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.effectiveness && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Effectiveness</h2>
-            <ReactMarkdown>{blocks.effectiveness}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.risks_and_limitations && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Risks and Limitations</h2>
-            <ReactMarkdown>{blocks.risks_and_limitations}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.how_it_works && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">How It Works</h2>
-            <ReactMarkdown>{blocks.how_it_works}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.applications && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Applications</h2>
-            <ReactMarkdown>{blocks.applications}</ReactMarkdown>
-          </section>
-        )}
-
         {blocks.strengths_and_limitations && (
           <section className="mb-8">
             <h2 className="text-2xl font-bold mb-4">Strengths and Limitations</h2>
             <ReactMarkdown>{blocks.strengths_and_limitations}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.evidence_base && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Evidence Base</h2>
-            <ReactMarkdown>{blocks.evidence_base}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.practical_applications && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Practical Applications</h2>
-            <ReactMarkdown>{blocks.practical_applications}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.neurodiversity_perspective && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Neurodiversity Perspective</h2>
-            <ReactMarkdown>{blocks.neurodiversity_perspective}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.common_strengths_and_challenges && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Common Strengths and Challenges</h2>
-            <ReactMarkdown>{blocks.common_strengths_and_challenges}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.prevalence_and_demographics && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Prevalence and Demographics</h2>
-            <ReactMarkdown>{blocks.prevalence_and_demographics}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.mechanisms_and_understanding && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Mechanisms and Understanding</h2>
-            <ReactMarkdown>{blocks.mechanisms_and_understanding}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.lived_experience && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Lived Experience</h2>
-            <ReactMarkdown>{blocks.lived_experience}</ReactMarkdown>
           </section>
         )}
 
@@ -335,14 +223,10 @@ export default async function ArticlePage({ params }: { params: { slug: string }
           </section>
         )}
 
-        {blocks.references && (
+        {blocks.references_and_resources && (
           <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">References</h2>
-            <div className="space-y-2">
-              {blocks.references.map((ref: string, index: number) => (
-                <p key={index} className="text-sm text-gray-600">{ref}</p>
-              ))}
-            </div>
+            <h2 className="text-2xl font-bold mb-4">References and Resources</h2>
+            <ReactMarkdown>{blocks.references_and_resources}</ReactMarkdown>
           </section>
         )}
       </div>
