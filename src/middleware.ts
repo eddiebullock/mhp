@@ -4,12 +4,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 export async function middleware(request: NextRequest) {
   // Create a response object that we can modify
   let response = NextResponse.next({
-    request: {
-      headers: request.headers,
-    },
+    request: { headers: request.headers },
   });
 
-  // Create a Supabase client configured to use cookies
+  // Create a Supabase client using createServerClient (from @supabase/ssr)
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -19,18 +17,10 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          });
+          response.cookies.set({ name, value, ...options });
         },
         remove(name: string, options: CookieOptions) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          });
+          response.cookies.set({ name, value: '', ...options });
         },
       },
     }
@@ -40,12 +30,7 @@ export async function middleware(request: NextRequest) {
   const path = request.nextUrl.pathname;
 
   // Skip middleware for static files and API routes
-  if (
-    path.startsWith('/_next') ||
-    path.startsWith('/api') ||
-    path.startsWith('/static') ||
-    path.includes('.')
-  ) {
+  if (path.startsWith('/_next') || path.startsWith('/api') || path.startsWith('/static') || path.includes('.')) {
     return response;
   }
 
@@ -55,9 +40,10 @@ export async function middleware(request: NextRequest) {
 
   // Get the session
   const { data: { session } } = await supabase.auth.getSession();
+  console.log('DEBUG: Session in middleware:', session);
 
-  // If the user is signed in and tries to access auth pages, redirect to profile
-  if (session && (path === '/auth/login' || path === '/auth/signup')) {
+  // Only redirect authenticated users away from /auth/login or /auth/signup if there is NO redirect query param
+  if (session && (path === '/auth/login' || path === '/auth/signup') && !request.nextUrl.searchParams.get('redirect')) {
     return NextResponse.redirect(new URL('/profile', request.url));
   }
 

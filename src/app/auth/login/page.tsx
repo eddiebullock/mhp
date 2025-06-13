@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
 
 export default function LoginPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const pathname = usePathname();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +24,10 @@ export default function LoginPage() {
         if (sessionError) throw sessionError;
         
         if (session) {
-          router.replace('/profile');
+          const redirectTo = searchParams.get('redirect') || '/profile';
+          if (pathname !== redirectTo) {
+            router.replace(redirectTo);
+          }
         }
       } catch (error) {
         console.error('Error checking session:', error);
@@ -32,7 +36,7 @@ export default function LoginPage() {
     };
 
     checkSession();
-  }, []);
+  }, [searchParams, router, supabase, pathname]);
 
   useEffect(() => {
     if (searchParams.get('verified') === 'true') {
@@ -65,7 +69,10 @@ export default function LoginPage() {
         throw new Error('Login failed. Please try again.');
       }
 
-      router.replace('/profile');
+      const redirectTo = searchParams.get('redirect') || '/profile';
+      if (pathname !== redirectTo) {
+        router.replace(redirectTo);
+      }
     } catch (error: any) {
       console.error('Login error:', error);
       setError(error.message || 'An error occurred during login. Please try again.');
