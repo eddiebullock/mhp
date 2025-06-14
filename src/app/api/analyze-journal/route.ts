@@ -23,7 +23,15 @@ const BRAIN_REGION_MAPPING: Record<string, string[]> = {
 // GPT system prompt for analysis
 const SYSTEM_PROMPT = `You are a neuroscience expert analyzing journal entries. Extract psychological experiences and rate their intensity (0-1 scale).
 
-Valid experiences: anxiety, stress, happiness, sadness, anger, exercise, social_interaction, learning, creativity, meditation, sleep_quality
+Valid experiences (ONLY use these exact types):
+- anxiety
+- stress
+- happiness
+- exercise
+- social_interaction
+- learning
+- creativity
+- meditation
 
 You MUST respond with ONLY a valid JSON object in this exact format, with no additional text or explanation:
 {
@@ -36,7 +44,12 @@ You MUST respond with ONLY a valid JSON object in this exact format, with no add
   ]
 }
 
-Do not include any markdown formatting, backticks, or additional text. Return ONLY the JSON object.`;
+Important rules:
+1. ONLY use the experience types listed above
+2. Map emotions like sadness or anger to the closest valid experience type (e.g., sadness might map to stress or anxiety)
+3. Map sleep-related experiences to meditation
+4. Do not include any markdown formatting, backticks, or additional text
+5. Return ONLY the JSON object`;
 
 export async function POST(request: Request) {
     try {

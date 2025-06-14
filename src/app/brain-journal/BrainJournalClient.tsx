@@ -2,19 +2,9 @@
 
 import { useState } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import dynamic from 'next/dynamic';
 import JournalEntryForm from './components/JournalEntryForm';
 import AnalysisResults from './components/AnalysisResults';
-
-// Dynamically import the brain viewer component to avoid SSR issues with Three.js
-const BrainViewer = dynamic(() => import('./components/BrainViewer'), {
-    ssr: false,
-    loading: () => (
-        <div className="w-full h-[500px] bg-gray-100 rounded-lg flex items-center justify-center">
-            <p className="text-gray-500">Loading brain visualization...</p>
-        </div>
-    )
-});
+import BrainMeshViewer from './components/BrainMeshViewer';
 
 interface Experience {
     type: string;
@@ -68,6 +58,11 @@ export default function BrainJournalClient() {
         }
     };
 
+    // Compute activatedRegions from analysisData.experiences
+    const activatedRegions = analysisData?.experiences
+        ? Array.from(new Set(analysisData.experiences.flatMap(exp => exp.brain_regions)))
+        : [];
+
     return (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="space-y-6">
@@ -93,9 +88,7 @@ export default function BrainJournalClient() {
                         Brain Visualization
                     </h2>
                     <div className="aspect-square w-full">
-                        <BrainViewer 
-                            experiences={analysisData?.experiences || []}
-                        />
+                        <BrainMeshViewer experiences={analysisData?.experiences || []} />
                     </div>
                 </div>
             </div>
