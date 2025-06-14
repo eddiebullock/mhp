@@ -1,4 +1,4 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
+import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
@@ -21,26 +21,31 @@ const BRAIN_REGION_MAPPING: Record<string, string[]> = {
 };
 
 // GPT system prompt for analysis
-const SYSTEM_PROMPT = `You are a psychological analysis assistant. Analyze the journal entry and extract psychological experiences.
-For each experience, provide:
-1. The type of experience (must be one of: anxiety, stress, happiness, exercise, social_interaction, learning, creativity, meditation)
-2. Intensity level (0-1, where 0 is minimal and 1 is maximum)
-3. A direct quote from the text that evidences this experience
+const SYSTEM_PROMPT = `You are a neuroscience expert analyzing journal entries. Extract psychological experiences and rate their intensity (0-1 scale).
 
-Format your response as a JSON array of objects with these fields:
+Valid experiences: anxiety, stress, happiness, sadness, anger, exercise, social_interaction, learning, creativity, meditation, sleep_quality
+
+You MUST respond with ONLY a valid JSON object in this exact format, with no additional text or explanation:
 {
-    "experiences": [
-        {
-            "type": "experience_type",
-            "intensity": 0.0-1.0,
-            "evidence": "quote from text"
-        }
-    ]
-}`;
+  "experiences": [
+    {
+      "type": "experience_type",
+      "intensity": 0.0-1.0,
+      "evidence": "exact quote from journal that indicates this"
+    }
+  ]
+}
+
+Do not include any markdown formatting, backticks, or additional text. Return ONLY the JSON object.`;
 
 export async function POST(request: Request) {
     try {
-        const supabase = createRouteHandlerClient({ cookies });
+        const cookieStore = await cookies();
+        const supabase = createServerClient(
+            process.env.NEXT_PUBLIC_SUPABASE_URL!,
+            process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+            { cookies: { get: (name) => cookieStore.get(name)?.value } }
+        );
         
         // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
@@ -56,15 +61,33 @@ export async function POST(request: Request) {
 
         // Call GPT-4 for analysis
         const completion = await openai.chat.completions.create({
-            model: "gpt-4",
+            model: "gpt-4o-mini",
             messages: [
                 { role: "system", content: SYSTEM_PROMPT },
-                { role: "user", content }
+                { role: "user", content: `Journal entry: "${content}"` }
             ],
             response_format: { type: "json_object" }
         });
 
-        const analysis = JSON.parse(completion.choices[0].message.content);
+        let analysis;
+        try {
+            const responseContent = completion.choices[0].message.content;
+            if (!responseContent) {
+                throw new Error('Empty response from GPT');
+            }
+            // Remove any potential markdown formatting
+            const cleanContent = responseContent.replace(/```json\n?|\n?```/g, '').trim();
+            analysis = JSON.parse(cleanContent);
+        } catch (error) {
+            console.error('Error parsing GPT response:', error);
+            console.error('Raw response:', completion.choices[0].message.content);
+            throw new Error('Invalid response format from GPT');
+        }
+
+        // Validate the analysis structure
+        if (!analysis.experiences || !Array.isArray(analysis.experiences)) {
+            throw new Error('Invalid analysis structure: missing experiences array');
+        }
 
         // Create journal entry in database
         const { data: journalEntry, error: journalError } = await supabase

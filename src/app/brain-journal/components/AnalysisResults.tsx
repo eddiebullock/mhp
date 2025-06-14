@@ -20,7 +20,8 @@ interface AnalysisResultsProps {
 
 export default function AnalysisResults({ experiences, journalEntry }: AnalysisResultsProps) {
     // Format experience type for display
-    const formatExperienceType = (type: string) => {
+    const formatExperienceType = (type: string | undefined) => {
+        if (!type || typeof type !== 'string') return '';
         return type.split('_').map(word => 
             word.charAt(0).toUpperCase() + word.slice(1)
         ).join(' ');
