@@ -53,3 +53,8 @@ Thumbs.db
 
 # Custom ignores
 /Users/eb2007/mhp/scripts/generate_articles_prompt.txt
+
+# Large model files
+public/models/*.glb
+public/models/temp.glb
+public/models/brain*.glb
