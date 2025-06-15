@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase';
 
 export default function HomePage() {
+  const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [placeholder, setPlaceholder] = useState('');
 
@@ -58,7 +60,7 @@ export default function HomePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      window.location.href = `/articles?search=${encodeURIComponent(searchQuery)}`;
+      router.push(`/articles?search=${encodeURIComponent(searchQuery)}`);
     }
   };
 

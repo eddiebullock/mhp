@@ -5,11 +5,12 @@ import { createBrowserClient } from '@supabase/ssr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Database } from '@/types/supabase';
+import { semanticSearch } from '@/lib/search';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 
 interface ArticlesListProps {
-  initialArticles: Article[];
+  initialArticles?: Article[];
 }
 
 export default function ArticlesList({ initialArticles }: ArticlesListProps) {
@@ -20,6 +21,8 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [placeholder, setPlaceholder] = useState('');
+  const [searchAnswer, setSearchAnswer] = useState<string | null>(null);
+  const [isSemanticSearch, setIsSemanticSearch] = useState(false);
 
   const searchTopics = [
     'neuroplasticity',
@@ -40,7 +43,25 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
   );
 
   useEffect(() => {
-    fetchArticles();
+    if (!searchQuery) {
+      setSearchAnswer(null);
+      setIsSemanticSearch(false);
+      fetchArticles();
+      return;
+    }
+
+    // Check if the query is conversational/natural language
+    const isNaturalLanguage = /^(how|what|why|when|where|do|does|can|could|would|should|tell|explain|help|i|my|me|we|our)/i.test(searchQuery) ||
+                             searchQuery.includes('?') ||
+                             searchQuery.length > 30;
+
+    if (isNaturalLanguage) {
+      setIsSemanticSearch(true);
+      handleSemanticSearch();
+    } else {
+      setIsSemanticSearch(false);
+      fetchArticles();
+    }
   }, [selectedCategory, searchQuery]);
 
   useEffect(() => {
@@ -76,6 +97,21 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
 
     animatePlaceholder();
   }, []);
+
+  const handleSemanticSearch = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const { answer, articles: relevantArticles } = await semanticSearch(searchQuery);
+      setSearchAnswer(answer);
+      setArticles(relevantArticles);
+    } catch (error) {
+      console.error('Error performing semantic search:', error);
+      setError('Failed to process your question. Please try rephrasing it.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const fetchArticles = async () => {
     try {
@@ -154,15 +190,34 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
+          <p className="mt-2 text-sm text-gray-500">
+            {isSemanticSearch 
+              ? "Ask any question about mental health, neuroscience, or brain health"
+              : "Search for specific topics, conditions, or treatments"}
+          </p>
         </div>
       </div>
+
+      {/* Search Answer */}
+      {searchAnswer && (
+        <div className="bg-white shadow rounded-lg p-6 mb-6">
+          <div className="prose prose-indigo max-w-none">
+            <div className="whitespace-pre-wrap">{searchAnswer}</div>
+          </div>
+          <div className="mt-4 text-sm text-gray-500">
+            This answer is generated from our trusted content database. For personalized advice, please consult with healthcare professionals.
+          </div>
+        </div>
+      )}
 
       {/* Articles List */}
       <div className="bg-white shadow rounded-lg p-6">
         {loading ? (
           <div className="text-center py-8">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto"></div>
-            <p className="mt-4 text-gray-600">Loading articles...</p>
+            <p className="mt-4 text-gray-600">
+              {isSemanticSearch ? "Analyzing your question..." : "Loading articles..."}
+            </p>
           </div>
         ) : error ? (
           <div className="text-center py-8">
@@ -224,7 +279,11 @@ export default function ArticlesList({ initialArticles }: ArticlesListProps) {
           </div>
         ) : (
           <div className="text-center py-8">
-            <p className="text-gray-500">No articles found.</p>
+            <p className="text-gray-500">
+              {searchQuery 
+                ? "No relevant articles found. Try rephrasing your question or search for a different topic."
+                : "No articles found."}
+            </p>
           </div>
         )}
       </div>
