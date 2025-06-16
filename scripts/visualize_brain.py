@@ -13,24 +13,29 @@ from matplotlib.colors import ListedColormap, LinearSegmentedColormap
 import matplotlib.patches as mpatches
 import seaborn as sns
 import logging
+import nilearn
+import os
+import shutil
+import cortex
+from PIL import Image
+import traceback
+import urllib.request
+import gzip
 
 # Set the style to a more paper-like appearance
 plt.style.use('seaborn-v0_8-whitegrid')
 sns.set_palette("husl")
 
-# Set up logging
+# Set up logging with more detail
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    stream=sys.stderr  # Log to stderr to avoid interfering with JSON output
+    level=logging.DEBUG,  # Changed to DEBUG for more detailed logs
+    format='%(asctime)s - %(levelname)s - %(message)s'
 )
 logger = logging.getLogger(__name__)
 
 # Constants for visualization
-SPHERE_RADIUS = 15  # Increased from 10 to make activation regions larger
-VIEWS = ['x', 'y', 'z']  # Changed from ['axial', 'sagittal', 'coronal'] to valid modes
-FIGURE_SIZE = (40, 20)  # Increased from (30, 15) for larger display
-DPI = 300  # Keep at 300 for reasonable file size while maintaining quality
+FIGURE_SIZE = (36, 12)
+DPI = 300
 
 # Load the MNI152 template and anatomical image
 mni_template = datasets.load_mni152_template()
@@ -38,19 +43,19 @@ anatomical_img = datasets.load_mni152_template(resolution=2)
 
 # Define vibrant colors for each brain region with increased opacity
 REGION_COLORS = {
-    'prefrontal_cortex': '#FF3333',  # Brighter red
-    'temporal_lobe': '#33B5FF',      # Brighter blue
-    'parietal_lobe': '#33CC33',      # Brighter green
-    'occipital_lobe': '#FFCC00',     # Brighter yellow
-    'amygdala': '#FF0066',           # Brighter pink
-    'hippocampus': '#9933FF',        # Brighter purple
-    'cerebellum': '#00CC99',         # Brighter teal
-    'brainstem': '#FF5500',          # Brighter orange
-    'thalamus': '#00CCFF',           # Brighter light blue
-    'hypothalamus': '#CC33FF',       # Brighter purple
-    'insula': '#FFCC00',             # Brighter amber
-    'motor_cortex': '#33CC33',       # Brighter green
-    'basal_ganglia': '#FF3333'       # Brighter coral red
+    'prefrontal_cortex': '#FF0000',  # Pure red
+    'temporal_lobe': '#0000FF',      # Pure blue
+    'parietal_lobe': '#00FF00',      # Pure green
+    'occipital_lobe': '#FFFF00',     # Pure yellow
+    'amygdala': '#FF00FF',           # Pure magenta
+    'hippocampus': '#800080',        # Deep purple
+    'cerebellum': '#00FFFF',         # Pure cyan
+    'brainstem': '#FFA500',          # Orange
+    'thalamus': '#0080FF',           # Bright blue
+    'hypothalamus': '#8000FF',       # Bright purple
+    'insula': '#FFD700',             # Gold
+    'motor_cortex': '#00FF80',       # Bright green
+    'basal_ganglia': '#FF0080'       # Bright pink
 }
 
 # Define descriptions for each brain region
@@ -80,245 +85,265 @@ REGION_CMAPS = {
     for region, color in REGION_COLORS.items()
 }
 
-# Define region coordinates (simplified for better visualization)
+# Define brain region coordinates (MNI space)
 REGION_COORDS = {
-    'prefrontal_cortex': [
-        (40, 30, 20), (-40, 30, 20),  # Front of brain
-        (35, 35, 15), (-35, 35, 15),  # Additional points for better coverage
-        (45, 25, 25), (-45, 25, 25)
-    ],
-    'temporal_lobe': [
-        (-50, -20, -10), (50, -20, -10),  # Sides of brain
-        (-45, -25, -5), (45, -25, -5),
-        (-55, -15, -15), (55, -15, -15)
-    ],
-    'parietal_lobe': [
-        (30, -50, 40), (-30, -50, 40),  # Top back of brain
-        (35, -45, 35), (-35, -45, 35),
-        (25, -55, 45), (-25, -55, 45)
-    ],
-    'occipital_lobe': [
-        (0, -80, 20),  # Back of brain
-        (10, -75, 25), (-10, -75, 25),
-        (0, -85, 15)
-    ],
-    'amygdala': [
-        (-20, -10, -20), (20, -10, -20),  # Deep in temporal lobes
-        (-25, -5, -25), (25, -5, -25),
-        (-15, -15, -15), (15, -15, -15)
-    ],
-    'hippocampus': [
-        (-30, -20, -20), (30, -20, -20),  # Deep in temporal lobes
-        (-35, -15, -25), (35, -15, -25),
-        (-25, -25, -15), (25, -25, -15)
-    ],
-    'cerebellum': [
-        (0, -50, -30),  # Back bottom of brain
-        (15, -45, -35), (-15, -45, -35),
-        (0, -55, -25)
-    ],
-    'brainstem': [
-        (0, -30, -40),  # Bottom of brain
-        (5, -25, -45), (-5, -25, -45),
-        (0, -35, -35)
-    ],
-    'thalamus': [
-        (0, -20, 0),  # Center of brain
-        (5, -15, 5), (-5, -15, 5),
-        (0, -25, -5)
-    ],
-    'hypothalamus': [
-        (0, -10, -10),  # Below thalamus
-        (5, -5, -15), (-5, -5, -15),
-        (0, -15, -5)
-    ],
-    'insula': [
-        (-35, 0, 0), (35, 0, 0),  # Deep in temporal lobes
-        (-40, 5, 5), (40, 5, 5),
-        (-30, -5, -5), (30, -5, -5)
-    ],
-    'motor_cortex': [
-        (30, -20, 50), (-30, -20, 50),  # Top of brain
-        (35, -15, 45), (-35, -15, 45),
-        (25, -25, 55), (-25, -25, 55)
-    ],
-    'basal_ganglia': [
-        (-20, -10, -20), (20, -10, -20),  # Deep in temporal lobes
-        (-25, -5, -25), (25, -5, -25),
-        (-15, -15, -15), (15, -15, -15)
-    ]
+    'prefrontal_cortex': [(0, 50, 0), (0, 45, 10), (0, 40, 20)],
+    'temporal_lobe': [(-50, -20, -10), (50, -20, -10), (-45, -30, 0), (45, -30, 0)],
+    'parietal_lobe': [(-30, -50, 50), (30, -50, 50), (-25, -60, 40), (25, -60, 40)],
+    'occipital_lobe': [(-20, -80, 0), (20, -80, 0), (0, -90, 10)],
+    'amygdala': [(-20, -10, -15), (20, -10, -15)],
+    'hippocampus': [(-25, -20, -15), (25, -20, -15)],
+    'cerebellum': [(0, -50, -30), (-10, -55, -25), (10, -55, -25)],
+    'brainstem': [(0, -30, -40)],
+    'thalamus': [(0, -20, 0), (-5, -25, 5), (5, -25, 5)],
+    'hypothalamus': [(0, -5, -10)],
+    'insula': [(-35, 0, 0), (35, 0, 0)],
+    'motor_cortex': [(-40, -20, 50), (40, -20, 50)],
+    'basal_ganglia': [(-15, 0, 0), (15, 0, 0)]
 }
 
-def create_activation_maps(experiences):
-    """Create separate activation maps for each brain region with enhanced visibility."""
-    # Initialize empty activation maps for each region
-    activation_maps = {region: np.zeros(mni_template.shape) for region in REGION_COLORS.keys()}
+def download_brain_template():
+    """Download and prepare the MNI152 brain template."""
+    template_dir = os.path.join(os.path.dirname(__file__), 'templates')
+    os.makedirs(template_dir, exist_ok=True)
     
-    # Create activation spheres for each experience with enhanced intensity
-    for exp in experiences:
-        intensity = (exp['intensity'] / 5.0) * 2.0  # Increased from 1.5 to 2.0 for stronger visibility
-        for region in exp['brain_regions']:
-            if region in REGION_COORDS:
-                for x, y, z in REGION_COORDS[region]:
-                    # Create a larger sphere of activation with smoother edges
-                    xx, yy, zz = np.ogrid[:mni_template.shape[0], :mni_template.shape[1], :mni_template.shape[2]]
-                    distance = np.sqrt((xx - x)**2 + (yy - y)**2 + (zz - z)**2)
-                    sphere = np.exp(-distance**2 / (2 * 100))  # Reduced from 150 to 100 for sharper edges
-                    activation_maps[region] += sphere * intensity
+    template_path = os.path.join(template_dir, 'mni152.nii.gz')
+    if os.path.exists(template_path):
+        try:
+            # Verify existing template
+            with gzip.open(template_path, 'rb') as f:
+                f.read(1)
+            logger.info("Using existing template file")
+            return nib.load(template_path)
+        except Exception as e:
+            logger.warning(f"Existing template file is invalid: {str(e)}")
+            os.remove(template_path)
     
-    # Normalize each activation map with enhanced contrast
-    for region in activation_maps:
-        if np.max(activation_maps[region]) > 0:
-            # Apply stronger sigmoid-like normalization for better contrast
-            activation_maps[region] = 1 / (1 + np.exp(-4 * (activation_maps[region] / np.max(activation_maps[region]) - 0.4)))
+    logger.info("Downloading MNI152 brain template...")
+    # Using direct link to MNI152 template from NeuroVault
+    url = "https://neurovault.org/media/images/35/35_MNI152_T1_1mm.nii.gz"
+    temp_path = os.path.join(template_dir, 'temp_template.nii.gz')
     
-    return activation_maps
+    try:
+        logger.debug("Attempting to download template...")
+        headers = {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+        }
+        req = urllib.request.Request(url, headers=headers)
+        
+        with urllib.request.urlopen(req) as response, open(temp_path, 'wb') as out_file:
+            # Read in chunks to handle large files
+            chunk_size = 8192
+            while True:
+                chunk = response.read(chunk_size)
+                if not chunk:
+                    break
+                out_file.write(chunk)
+        
+        # Verify the downloaded file
+        try:
+            # First verify it's a valid gzip file
+            with gzip.open(temp_path, 'rb') as f:
+                f.read(1)
+            
+            # Then verify it's a valid NIfTI file
+            test_load = nib.load(temp_path)
+            if not isinstance(test_load, nib.Nifti1Image):
+                raise ValueError("Downloaded file is not a valid NIfTI image")
+            
+            # If we get here, both checks passed
+            os.rename(temp_path, template_path)
+            logger.info("Template downloaded and verified successfully")
+            return test_load
+            
+        except Exception as e:
+            logger.error(f"Downloaded file verification failed: {str(e)}")
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            raise Exception("Failed to download a valid brain template file")
+            
+    except Exception as e:
+        logger.error(f"Error downloading template: {str(e)}")
+        # Fallback to a simpler template
+        logger.info("Attempting to download fallback template...")
+        fallback_url = "https://www.bic.mni.mcgill.ca/~vfonov/icbm/2009/mni_icbm152_nl_asym_09c_t1_tal_nlin_sym_09c.nii.gz"
+        try:
+            req = urllib.request.Request(fallback_url, headers=headers)
+            with urllib.request.urlopen(req) as response, open(temp_path, 'wb') as out_file:
+                chunk_size = 8192
+                while True:
+                    chunk = response.read(chunk_size)
+                    if not chunk:
+                        break
+                    out_file.write(chunk)
+            
+            # Verify the fallback file
+            try:
+                with gzip.open(temp_path, 'rb') as f:
+                    f.read(1)
+                test_load = nib.load(temp_path)
+                if not isinstance(test_load, nib.Nifti1Image):
+                    raise ValueError("Fallback file is not a valid NIfTI image")
+                os.rename(temp_path, template_path)
+                logger.info("Fallback template downloaded and verified successfully")
+                return test_load
+            except Exception as e2:
+                logger.error(f"Fallback file verification failed: {str(e2)}")
+                if os.path.exists(temp_path):
+                    os.remove(temp_path)
+                raise Exception("Failed to download any valid brain template file")
+                
+        except Exception as e2:
+            logger.error(f"Error downloading fallback template: {str(e2)}")
+            if os.path.exists(temp_path):
+                os.remove(temp_path)
+            raise Exception("Failed to download any brain template. Please check your internet connection and try again.")
+
+def create_activation_volume(experiences):
+    """Create a 3D volume of brain activation."""
+    try:
+        logger.debug(f"Creating activation volume for {len(experiences)} experiences")
+        # Initialize volume (91x109x91 MNI space)
+        volume = np.zeros((91, 109, 91))
+        
+        # Create activation spheres for each experience
+        for i, exp in enumerate(experiences):
+            logger.debug(f"Processing experience {i+1}/{len(experiences)}")
+            intensity = (exp['intensity'] / 5.0) * 2.0  # Scale intensity
+            for region in exp['brain_regions']:
+                if region in REGION_COORDS:
+                    logger.debug(f"Adding activation for region: {region}")
+                    for x, y, z in REGION_COORDS[region]:
+                        # Convert MNI coordinates to volume indices
+                        x_idx = int((x + 45) * 91/90)  # Scale to volume dimensions
+                        y_idx = int((y + 90) * 109/180)
+                        z_idx = int((z + 45) * 91/90)
+                        
+                        # Create activation sphere
+                        xx, yy, zz = np.ogrid[:91, :109, :91]
+                        distance = np.sqrt((xx - x_idx)**2 + (yy - y_idx)**2 + (zz - z_idx)**2)
+                        sphere = np.exp(-distance**2 / (2 * 5**2))  # Gaussian sphere
+                        volume = np.maximum(volume, sphere * intensity)
+        
+        # Normalize volume
+        if np.max(volume) > 0:
+            volume = volume / np.max(volume)
+            logger.debug(f"Volume normalized. Max value: {np.max(volume)}")
+        else:
+            logger.warning("Volume is empty - no activation detected")
+        
+        return volume
+    except Exception as e:
+        logger.error(f"Error in create_activation_volume: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
+
+def plot_slice(ax, template_data, activation_data, slice_idx, view, title):
+    """Plot a single slice of the brain with activation overlay."""
+    try:
+        logger.debug(f"Plotting {view} slice at index {slice_idx}")
+        
+        # Get the appropriate slice for both template and activation
+        if view == 'sagittal':
+            template_slice = template_data[slice_idx, :, :]
+            activation_slice = activation_data[slice_idx, :, :]
+        elif view == 'coronal':
+            template_slice = template_data[:, slice_idx, :]
+            activation_slice = activation_data[:, slice_idx, :]
+        else:  # axial
+            template_slice = template_data[:, :, slice_idx]
+            activation_slice = activation_data[:, :, slice_idx]
+        
+        # Normalize template data for better visibility
+        template_slice = (template_slice - template_slice.min()) / (template_slice.max() - template_slice.min())
+        
+        # Create RGB image with template as grayscale background
+        rgb = np.zeros((*template_slice.shape, 3))
+        rgb[..., 0] = template_slice  # Red channel
+        rgb[..., 1] = template_slice  # Green channel
+        rgb[..., 2] = template_slice  # Blue channel
+        
+        # Add activation overlay in red
+        activation_mask = activation_slice > 0.1  # Threshold for visibility
+        rgb[activation_mask, 0] = np.maximum(rgb[activation_mask, 0], activation_slice[activation_mask])
+        rgb[activation_mask, 1] = np.minimum(rgb[activation_mask, 1], 1 - activation_slice[activation_mask])
+        rgb[activation_mask, 2] = np.minimum(rgb[activation_mask, 2], 1 - activation_slice[activation_mask])
+        
+        # Plot the slice
+        im = ax.imshow(rgb, 
+                      origin='lower',
+                      aspect='equal')
+        
+        # Add title
+        ax.set_title(title, fontsize=24, pad=20)
+        
+        # Remove axis
+        ax.axis('off')
+        
+        logger.debug(f"Successfully plotted {view} slice")
+        return im
+    except Exception as e:
+        logger.error(f"Error in plot_slice for {view}: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise
 
 def generate_visualization(experiences):
-    """Generate user-friendly brain visualization with enhanced colored regions."""
+    """Generate high-quality brain visualization using matplotlib."""
     try:
         logger.info("Starting visualization generation")
-        logger.info(f"Processing {len(experiences)} experiences")
-
-        # Extract active regions from experiences and filter out unknown regions
-        active_regions = set()
-        for experience in experiences:
-            # Only add regions that exist in our coordinate system
-            active_regions.update(region for region in experience['brain_regions'] 
-                                if region in REGION_COORDS)
+        logger.debug(f"Received {len(experiences)} experiences")
         
-        logger.info(f"Found {len(active_regions)} active regions: {active_regions}")
-
-        if not active_regions:
-            raise ValueError("No valid brain regions found in the experiences")
-
-        # Load anatomical template
-        logger.info("Loading anatomical template")
-        anatomical_img = datasets.load_mni152_template()
-        mni_template = anatomical_img.get_fdata()
-        logger.info(f"Template shape: {mni_template.shape}")
-
-        # Create activation maps for each region
-        logger.info("Creating activation maps")
-        activation_maps = {}
-        for region in active_regions:
-            logger.info(f"Processing region: {region}")
-            # Create a sphere of activation at the region's coordinates
-            activation = np.zeros(mni_template.shape)
-            for coord in REGION_COORDS[region]:
-                # Create a sphere of activation
-                x, y, z = coord
-                x_idx, y_idx, z_idx = np.ogrid[:mni_template.shape[0], :mni_template.shape[1], :mni_template.shape[2]]
-                dist = np.sqrt((x_idx - x)**2 + (y_idx - y)**2 + (z_idx - z)**2)
-                sphere = np.exp(-dist**2 / (2 * (SPHERE_RADIUS/2)**2))  # Gaussian falloff
-                activation = np.maximum(activation, sphere)
-            
-            # Normalize activation
-            if np.max(activation) > 0:
-                activation = activation / np.max(activation)
-            
-            # Store the activation map
-            activation_maps[region] = activation
-            logger.info(f"Created activation map for {region} with max value: {np.max(activation)}")
-
-        # Create a combined RGB activation map for visualization
-        logger.info("Creating combined RGB visualization")
-        combined_rgb = np.zeros((*mni_template.shape, 3), dtype=np.float32)
-        alpha_map = np.zeros(mni_template.shape, dtype=np.float32)
+        # Load brain template
+        logger.info("Loading brain template")
+        template = download_brain_template()
+        template_data = template.get_fdata()
         
-        # Overlay each region's color using alpha blending
-        for region, activation_map in activation_maps.items():
-            if np.max(activation_map) > 0:
-                color_hex = REGION_COLORS[region].lstrip('#')
-                color_rgb = tuple(int(color_hex[i:i+2], 16)/255.0 for i in (0, 2, 4))
-                # Blend color into the combined_rgb map
-                for c in range(3):
-                    combined_rgb[..., c] += activation_map * color_rgb[c]
-                alpha_map += activation_map
-
-        # Normalize so that overlapping regions don't oversaturate
-        alpha_map = np.clip(alpha_map, 0, 1)
-        for c in range(3):
-            combined_rgb[..., c] = np.clip(combined_rgb[..., c], 0, 1)
-
-        # Create a grayscale anatomical background
-        logger.info("Creating anatomical background")
-        anat_data = anatomical_img.get_fdata()
-        anat_norm = (anat_data - anat_data.min()) / (np.ptp(anat_data) + 1e-8)
-
-        # Blend anatomical background and colored activations
-        final_rgb = np.zeros_like(combined_rgb)
-        for c in range(3):
-            final_rgb[..., c] = (1 - alpha_map) * anat_norm + alpha_map * combined_rgb[..., c]
-
-        # Create a single 3D image for visualization
-        logger.info("Creating final visualization image")
-        visualization_img = np.max(final_rgb, axis=-1)
-        visualization_nii = new_img_like(anatomical_img, visualization_img)
-
-        # Create figure with subplots
-        logger.info("Creating figure with subplots")
-        fig = plt.figure(figsize=FIGURE_SIZE, facecolor='white', dpi=DPI)
-        fig.suptitle('Brain Activity Visualization', fontsize=36, y=0.95, fontweight='bold')
-
+        # Create activation volume
+        logger.info("Creating activation volume")
+        activation_volume = create_activation_volume(experiences)
+        
+        # Create figure
+        logger.info("Creating visualization")
+        fig = plt.figure(figsize=FIGURE_SIZE, dpi=DPI)
+        
+        # Define views and their slice indices
+        views = [
+            ('sagittal', 'Sagittal View (Left-Right)', 45),  # Middle slice
+            ('coronal', 'Coronal View (Front-Back)', 54),    # Middle slice
+            ('axial', 'Axial View (Top-Bottom)', 45)         # Middle slice
+        ]
+        
         # Plot each view
-        for i, view in enumerate(VIEWS):
-            logger.info(f"Plotting {view} view")
+        for i, (view, title, slice_idx) in enumerate(views):
+            logger.debug(f"Processing view {i+1}/3: {view}")
             ax = fig.add_subplot(1, 3, i+1)
             try:
-                plotting.plot_img(
-                    visualization_nii,
-                    axes=ax,
-                    display_mode=view,
-                    cut_coords=None,
-                    colorbar=False,
-                    annotate=False,
-                    draw_cross=False,
-                    black_bg=False,
-                    cmap='hot',
-                    alpha=0.8  # Added alpha for better visibility
-                )
-                ax.set_title(f'{view.title()} View', fontsize=28, pad=20)
+                im = plot_slice(ax, template_data, activation_volume, slice_idx, view, title)
             except Exception as e:
                 logger.error(f"Error plotting {view} view: {str(e)}")
+                logger.error(traceback.format_exc())
                 raise
-
-        # Add legend only for active regions
-        logger.info("Adding legend")
-        legend_elements = []
-        for region in active_regions:
-            if region in REGION_COLORS:
-                color = REGION_COLORS[region]
-                label = f"{region.replace('_', ' ').title()}"
-                legend_elements.append(plt.Rectangle((0, 0), 1, 1, fc=color, label=label))
-
-        # Add legend with a white background
-        legend = fig.legend(
-            handles=legend_elements,
-            loc='center',
-            bbox_to_anchor=(0.5, 0.02),
-            ncol=2,
-            frameon=True,
-            framealpha=1,
-            facecolor='white',
-            edgecolor='gray',
-            fontsize=16
-        )
-
+        
         # Add a note about the visualization
         plt.figtext(
             0.5, 0.01,
-            'Note: Colors indicate brain regions activated during your experiences. Intensity of color represents relative activation strength.',
+            'Note: Red highlights indicate brain regions activated during your experiences. Brighter red represents stronger activation.',
             ha='center',
             fontsize=16,
             style='italic'
         )
-
-        # Adjust layout and save
-        logger.info("Saving visualization")
-        plt.tight_layout(rect=[0, 0.1, 1, 0.9])
         
-        # Save to buffer with optimized settings
+        # Add colorbar
+        logger.debug("Adding colorbar")
+        cbar_ax = fig.add_axes([0.92, 0.15, 0.02, 0.7])
+        cbar = fig.colorbar(im, cax=cbar_ax)
+        cbar.set_label('Activation Intensity', fontsize=14)
+        
+        # Adjust layout
+        plt.tight_layout(rect=[0, 0.1, 0.9, 0.9])
+        
+        # Save to buffer
+        logger.info("Saving visualization")
         buf = BytesIO()
         plt.savefig(
             buf,
@@ -334,49 +359,38 @@ def generate_visualization(experiences):
         
         # Convert to base64
         buf.seek(0)
-        img_base64 = base64.b64encode(buf.getvalue()).decode('utf-8')
+        img_str = base64.b64encode(buf.read()).decode('utf-8')
         
-        # Create regions list with intensity and descriptions
-        regions = []
-        for region in active_regions:
-            # Find the experience that activated this region
-            region_experience = next(
-                (exp for exp in experiences if region in exp['brain_regions']),
-                None
-            )
-            intensity = region_experience['intensity'] if region_experience else 0.5
-            
-            # Get region description
-            description = BRAIN_REGION_DESCRIPTIONS.get(region, region.replace('_', ' ').title())
-            
-            regions.append({
-                'region': region,
-                'intensity': intensity,
-                'description': description
-            })
-
-        # Return the visualization data in the expected format
+        logger.info("Visualization generated successfully")
         return {
-            'visualization': f'data:image/png;base64,{img_base64}',
-            'regions': regions,
-            'max_intensity': max(exp['intensity'] for exp in experiences)
+            'visualization': f'data:image/png;base64,{img_str}',
+            'message': 'Brain visualization generated successfully'
         }
+        
     except Exception as e:
-        logger.error(f"Error in generate_visualization: {str(e)}", exc_info=True)
-        raise
+        logger.error(f"Error generating visualization: {str(e)}")
+        logger.error(traceback.format_exc())
+        raise Exception(f"Failed to generate brain visualization: {str(e)}")
 
 if __name__ == '__main__':
     try:
-        # Read input data from command line argument
-        input_data = json.loads(sys.argv[1])
-        logger.info("Received input data")
+        # Read input from stdin
+        logger.debug("Reading input from stdin")
+        input_data = json.loads(sys.stdin.read())
+        logger.debug(f"Received input data: {input_data}")
         
-        # Generate visualization
+        if not input_data.get('experiences'):
+            logger.error("No experiences found in input data")
+            raise ValueError("No experiences provided in input data")
+            
         result = generate_visualization(input_data['experiences'])
-        
-        # Output clean JSON to stdout
         print(json.dumps(result))
-        sys.exit(0)
+        logger.info("Successfully completed visualization generation")
+    except json.JSONDecodeError as e:
+        logger.error(f"Error decoding JSON input: {str(e)}")
+        logger.error(traceback.format_exc())
+        sys.exit(1)
     except Exception as e:
-        logger.error(f"Error in main: {str(e)}", exc_info=True)
+        logger.error(f"Error in main: {str(e)}")
+        logger.error(traceback.format_exc())
         sys.exit(1) 

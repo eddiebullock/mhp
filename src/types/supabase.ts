@@ -6,6 +6,16 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
+export type ArticleCategory =
+  | 'mental_health'
+  | 'neuroscience'
+  | 'psychology'
+  | 'brain_health'
+  | 'neurodiversity'
+  | 'interventions'
+  | 'lifestyle_factors'
+  | 'lab_testing';
+
 export interface Database {
   public: {
     Tables: {
@@ -13,11 +23,12 @@ export interface Database {
         Row: {
           id: string
           created_at: string
+          updated_at: string
           title: string
           slug: string
           summary: string
-          category: string
-          status: 'published' | 'draft'
+          category: ArticleCategory
+          status: 'published' | 'draft' | 'archived'
           tags: string[]
           content_blocks: {
             overview?: string
@@ -54,11 +65,12 @@ export interface Database {
         Insert: {
           id?: string
           created_at?: string
+          updated_at?: string
           title: string
           slug: string
           summary: string
-          category: string
-          status?: 'published' | 'draft'
+          category: ArticleCategory
+          status?: 'published' | 'draft' | 'archived'
           tags?: string[]
           content_blocks?: {
             overview?: string
@@ -95,11 +107,12 @@ export interface Database {
         Update: {
           id?: string
           created_at?: string
+          updated_at?: string
           title?: string
           slug?: string
           summary?: string
-          category?: string
-          status?: 'published' | 'draft'
+          category?: ArticleCategory
+          status?: 'published' | 'draft' | 'archived'
           tags?: string[]
           content_blocks?: {
             overview?: string

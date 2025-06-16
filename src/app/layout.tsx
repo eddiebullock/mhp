@@ -49,7 +49,10 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className="min-h-screen bg-gray-50">
+      <body 
+        className="min-h-screen bg-gray-50"
+        suppressHydrationWarning={true}
+      >
         <nav className="bg-white shadow">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
@@ -65,10 +68,22 @@ export default function RootLayout({
                     Browse Articles
                   </Link>
                   <Link
-                    href="/brain-journal"
+                    href="/lifestyle"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
-                    Brain Journal
+                    Lifestyle
+                  </Link>
+                  <Link
+                    href="/interventions"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    Interventions
+                  </Link>
+                  <Link
+                    href="/risk-factors"
+                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
+                  >
+                    Risk Factors
                   </Link>
                 </div>
               </div>

@@ -2,19 +2,17 @@ import { useEffect, useState } from 'react';
 import type { APIExperience } from '../types';
 
 interface BrainVisualizationProps {
-    experiences: APIExperience[];
-}
-
-interface VisualizationRegion {
-    region: string;
-    intensity: number;
-    description: string;
+    experiences: Array<{
+        type: string;
+        intensity: number;
+        brain_regions: string[];
+        explanation?: string;
+    }>;
 }
 
 interface VisualizationData {
     visualization: string;
-    regions: VisualizationRegion[];
-    max_intensity: number;
+    message: string;
 }
 
 export default function BrainVisualization({ experiences }: BrainVisualizationProps) {
@@ -72,35 +70,63 @@ export default function BrainVisualization({ experiences }: BrainVisualizationPr
     }
 
     if (!visualizationData) {
-        return (
-            <div className="w-full h-full min-h-[500px] bg-white rounded-lg shadow-lg flex items-center justify-center">
-                <div className="text-gray-500">No visualization available</div>
-            </div>
-        );
+        return null;
     }
 
+    // Extract unique brain regions from experiences
+    const uniqueRegions = Array.from(new Set(
+        experiences.flatMap(exp => exp.brain_regions)
+    ));
+
     return (
-        <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
-            <div className="p-4">
-                <h3 className="text-lg font-semibold mb-2">Brain Activation Map</h3>
-                <div className="relative w-full aspect-[3/1]">
-                    <img
-                        src={visualizationData.visualization}
-                        alt="Brain activation visualization"
-                        className="w-full h-full object-contain"
-                    />
-                </div>
-                <div className="mt-4">
-                    <h4 className="font-medium mb-2">Active Brain Regions:</h4>
-                    <div className="flex flex-wrap gap-2">
-                        {visualizationData.regions.map((regionObj) => (
-                            <span
-                                key={regionObj.region}
-                                className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
-                            >
-                                {regionObj.description} ({regionObj.intensity}/5)
-                            </span>
-                        ))}
+        <div className="space-y-6">
+            {/* Brain Visualization Image */}
+            <div className="w-full bg-white rounded-lg shadow-lg overflow-hidden">
+                <img 
+                    src={visualizationData.visualization} 
+                    alt="Brain Activity Visualization"
+                    className="w-full h-auto"
+                />
+            </div>
+
+            {/* Brain Regions Summary */}
+            <div className="bg-white rounded-lg shadow-lg p-6">
+                <h3 className="text-xl font-semibold mb-4">Brain Activity Summary</h3>
+                <div className="space-y-4">
+                    <div>
+                        <h4 className="font-medium mb-2">Active Brain Regions:</h4>
+                        <div className="flex flex-wrap gap-2">
+                            {uniqueRegions.map((region) => (
+                                <span
+                                    key={region}
+                                    className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
+                                >
+                                    {region.replace('_', ' ')}
+                                </span>
+                            ))}
+                        </div>
+                    </div>
+                    <div>
+                        <h4 className="font-medium mb-2">Experiences Detected:</h4>
+                        <div className="space-y-2">
+                            {experiences.map((exp, index) => (
+                                <div key={index} className="p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex justify-between items-start">
+                                        <span className="font-medium capitalize">
+                                            {exp.type.replace('_', ' ')}
+                                        </span>
+                                        <span className="text-sm text-gray-600">
+                                            Intensity: {exp.intensity}/5
+                                        </span>
+                                    </div>
+                                    {exp.explanation && (
+                                        <p className="mt-1 text-sm text-gray-600">
+                                            {exp.explanation}
+                                        </p>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </div>

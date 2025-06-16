@@ -23,10 +23,14 @@ export async function POST(request: Request) {
         console.log('Input data:', JSON.stringify(data, null, 2));
 
         // Call Python script with virtual environment Python
-        const pythonProcess = spawn(pythonPath, [pythonScript, JSON.stringify(data)]);
+        const pythonProcess = spawn(pythonPath, [pythonScript]);
 
         let visualizationData = '';
         let errorData = '';
+
+        // Write input data to Python script's stdin
+        pythonProcess.stdin.write(JSON.stringify(data));
+        pythonProcess.stdin.end();
 
         // Collect data from Python script
         pythonProcess.stdout.on('data', (data) => {
@@ -68,7 +72,7 @@ export async function POST(request: Request) {
         const result = JSON.parse(visualizationData);
         console.log('Visualization result:', { 
             ...result, 
-            image: result.image ? `${result.image.substring(0, 50)}...` : null 
+            visualization: result.visualization ? `${result.visualization.substring(0, 50)}...` : null 
         });
 
         return NextResponse.json(result);
