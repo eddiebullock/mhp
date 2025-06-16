@@ -68,22 +68,16 @@ export default function RootLayout({
                     Browse Articles
                   </Link>
                   <Link
-                    href="/lifestyle"
+                    href="/evidence"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
-                    Lifestyle
+                    Evidence
                   </Link>
                   <Link
-                    href="/interventions"
+                    href="/feed"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
-                    Interventions
-                  </Link>
-                  <Link
-                    href="/risk-factors"
-                    className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
-                  >
-                    Risk Factors
+                    Latest Updates
                   </Link>
                 </div>
               </div>
