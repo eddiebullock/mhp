@@ -5,9 +5,15 @@ interface BrainVisualizationProps {
     experiences: APIExperience[];
 }
 
+interface VisualizationRegion {
+    region: string;
+    intensity: number;
+    description: string;
+}
+
 interface VisualizationData {
     visualization: string;
-    regions: string[];
+    regions: VisualizationRegion[];
     max_intensity: number;
 }
 
@@ -87,12 +93,12 @@ export default function BrainVisualization({ experiences }: BrainVisualizationPr
                 <div className="mt-4">
                     <h4 className="font-medium mb-2">Active Brain Regions:</h4>
                     <div className="flex flex-wrap gap-2">
-                        {visualizationData.regions.map((region) => (
+                        {visualizationData.regions.map((regionObj) => (
                             <span
-                                key={region}
+                                key={regionObj.region}
                                 className="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm"
                             >
-                                {region.replace('_', ' ')}
+                                {regionObj.description} ({regionObj.intensity}/5)
                             </span>
                         ))}
                     </div>

@@ -30,20 +30,32 @@ export async function POST(request: Request) {
 
         // Collect data from Python script
         pythonProcess.stdout.on('data', (data) => {
-            console.log('Python stdout:', data.toString());
-            visualizationData += data.toString();
+            const chunk = data.toString();
+            console.log('Python stdout chunk:', chunk);
+            visualizationData += chunk;
         });
 
         pythonProcess.stderr.on('data', (data) => {
-            console.error('Python stderr:', data.toString());
-            errorData += data.toString();
+            const chunk = data.toString();
+            console.error('Python stderr chunk:', chunk);
+            errorData += chunk;
         });
 
         // Wait for Python script to complete
         await new Promise((resolve, reject) => {
             pythonProcess.on('close', (code) => {
                 if (code === 0) {
-                    resolve(null);
+                    // Clean up the visualization data - remove any non-JSON content
+                    visualizationData = visualizationData.trim();
+                    try {
+                        // Try to parse the data to validate it's JSON
+                        JSON.parse(visualizationData);
+                        resolve(null);
+                    } catch (e: unknown) {
+                        console.error('Invalid JSON output:', visualizationData);
+                        const errorMessage = e instanceof Error ? e.message : String(e);
+                        reject(new Error(`Invalid JSON output from Python script: ${errorMessage}`));
+                    }
                 } else {
                     console.error('Python script failed with code:', code);
                     console.error('Error output:', errorData);
@@ -54,7 +66,10 @@ export async function POST(request: Request) {
 
         // Parse the visualization data
         const result = JSON.parse(visualizationData);
-        console.log('Visualization result:', result);
+        console.log('Visualization result:', { 
+            ...result, 
+            image: result.image ? `${result.image.substring(0, 50)}...` : null 
+        });
 
         return NextResponse.json(result);
     } catch (error) {
