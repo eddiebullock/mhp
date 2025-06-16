@@ -3,18 +3,30 @@
 import { useState } from 'react';
 
 interface JournalEntryFormProps {
-    onSubmit: (content: string) => Promise<void>;
-    isAnalyzing: boolean;
+    onSubmit: (entry: string) => Promise<void>;
+    isSubmitting: boolean;
 }
 
-export default function JournalEntryForm({ onSubmit, isAnalyzing }: JournalEntryFormProps) {
-    const [content, setContent] = useState('');
+export default function JournalEntryForm({ onSubmit, isSubmitting }: JournalEntryFormProps) {
+    const [entry, setEntry] = useState('');
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
-        if (!content.trim()) return;
-        await onSubmit(content);
-    };
+        
+        // Validate entry
+        if (!entry.trim()) {
+            console.error('Journal entry is empty');
+            return;
+        }
+
+        try {
+            await onSubmit(entry.trim());
+            // Clear form after successful submission
+            setEntry('');
+        } catch (error) {
+            console.error('Error submitting journal entry:', error);
+        }
+    }
 
     return (
         <div className="bg-white rounded-lg shadow-lg p-6">
@@ -24,34 +36,35 @@ export default function JournalEntryForm({ onSubmit, isAnalyzing }: JournalEntry
             <form onSubmit={handleSubmit} className="space-y-4">
                 <div>
                     <label 
-                        htmlFor="journal-content" 
+                        htmlFor="journal-entry" 
                         className="block text-sm font-medium text-gray-700 mb-2"
                     >
-                        How was your day? Write about your experiences, emotions, and activities.
+                        How are you feeling today?
                     </label>
                     <textarea
-                        id="journal-content"
+                        id="journal-entry"
                         rows={8}
-                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:ring-indigo-500 focus:border-indigo-500"
-                        placeholder="Today I felt..."
-                        value={content}
-                        onChange={(e) => setContent(e.target.value)}
-                        disabled={isAnalyzing}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                        placeholder="Describe your thoughts, feelings, and experiences..."
+                        value={entry}
+                        onChange={(e) => setEntry(e.target.value)}
+                        disabled={isSubmitting}
+                        required
                     />
                 </div>
                 <div className="flex justify-end">
                     <button
                         type="submit"
-                        disabled={!content.trim() || isAnalyzing}
+                        disabled={isSubmitting || !entry.trim()}
                         className={`
                             px-4 py-2 rounded-md text-white font-medium
-                            ${!content.trim() || isAnalyzing
+                            ${isSubmitting || !entry.trim()
                                 ? 'bg-gray-400 cursor-not-allowed'
-                                : 'bg-indigo-600 hover:bg-indigo-700'
+                                : 'bg-blue-600 hover:bg-blue-700'
                             }
                         `}
                     >
-                        {isAnalyzing ? 'Analyzing...' : 'Analyze Entry'}
+                        {isSubmitting ? 'Analyzing...' : 'Analyze Entry'}
                     </button>
                 </div>
             </form>

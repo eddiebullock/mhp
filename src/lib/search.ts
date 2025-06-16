@@ -115,18 +115,24 @@ function isRacingThoughtsContent(text: string): boolean {
   return thoughtTerms.some(term => textLower.includes(term));
 }
 
+function detectTopic(query: string): string | null {
+  const topics = [
+    'adhd', 'anxiety', 'depression', 'sleep', 'insomnia', 'stress', 'autism', 'bipolar', 'ocd', 'ptsd', 'trauma', 'addiction', 'psychosis', 'schizophrenia', 'eating disorder', 'self harm', 'suicide', 'panic', 'phobia', 'neuroplasticity', 'neurotransmitter', 'brain', 'cognition', 'therapy', 'cbt', 'mindfulness', 'meditation', 'emotion', 'mood', 'wellbeing', 'mental health', 'psychology', 'neuroscience', 'brain health'
+  ];
+  const lower = query.toLowerCase();
+  for (const topic of topics) {
+    if (lower.includes(topic)) return topic;
+  }
+  return null;
+}
+
 function extractRelevantContent(article: Article, query: string): string[] {
   const relevantContent: string[] = [];
   const processedQuery = preprocessQuery(query);
-  const isSleepQuery = processedQuery.includes('sleep') || 
-                      processedQuery.includes('insomnia') || 
-                      processedQuery.includes('tired') || 
-                      processedQuery.includes('rest');
-  const isRacingThoughtsQuery = processedQuery.includes('race') || 
-                               processedQuery.includes('mind') || 
-                               processedQuery.includes('thought');
-  
-  // For sleep-related queries, be very strict about content relevance
+  const topic = detectTopic(processedQuery);
+  const isSleepQuery = topic === 'sleep' || topic === 'insomnia' || processedQuery.includes('tired') || processedQuery.includes('rest');
+  const isRacingThoughtsQuery = processedQuery.includes('race') || processedQuery.includes('mind') || processedQuery.includes('thought');
+
   if (isSleepQuery) {
     // First, check if the article is actually about sleep
     const articleText = (article.title + ' ' + article.summary + ' ' + 
@@ -185,60 +191,83 @@ function extractRelevantContent(article: Article, query: string): string[] {
     return relevantContent;
   }
 
-  // Add category-specific content based on the query
+  // ADHD
+  if (topic === 'adhd') {
+    if (article.category === 'mental_health' || article.category === 'brain_health') {
+      if (article.content_blocks?.overview && article.content_blocks.overview.toLowerCase().includes('adhd')) relevantContent.push(article.content_blocks.overview);
+      if (article.content_blocks?.symptoms_and_impact && article.content_blocks.symptoms_and_impact.toLowerCase().includes('adhd')) relevantContent.push(article.content_blocks.symptoms_and_impact);
+      if (article.content_blocks?.practical_takeaways && article.content_blocks.practical_takeaways.toLowerCase().includes('adhd')) relevantContent.push(article.content_blocks.practical_takeaways);
+      if (article.content_blocks?.practical_applications && article.content_blocks.practical_applications.toLowerCase().includes('adhd')) relevantContent.push(article.content_blocks.practical_applications);
+      if (article.content_blocks?.how_it_works && article.content_blocks.how_it_works.toLowerCase().includes('adhd')) relevantContent.push(article.content_blocks.how_it_works);
+    }
+    if (article.summary && article.summary.toLowerCase().includes('adhd')) relevantContent.push(article.summary);
+    return relevantContent;
+  }
+
+  // Anxiety
+  if (topic === 'anxiety') {
+    if (article.content_blocks?.overview && article.content_blocks.overview.toLowerCase().includes('anxiety')) relevantContent.push(article.content_blocks.overview);
+    if (article.content_blocks?.symptoms_and_impact && article.content_blocks.symptoms_and_impact.toLowerCase().includes('anxiety')) relevantContent.push(article.content_blocks.symptoms_and_impact);
+    if (article.content_blocks?.practical_takeaways && article.content_blocks.practical_takeaways.toLowerCase().includes('anxiety')) relevantContent.push(article.content_blocks.practical_takeaways);
+    if (article.content_blocks?.practical_applications && article.content_blocks.practical_applications.toLowerCase().includes('anxiety')) relevantContent.push(article.content_blocks.practical_applications);
+    if (article.content_blocks?.how_it_works && article.content_blocks.how_it_works.toLowerCase().includes('anxiety')) relevantContent.push(article.content_blocks.how_it_works);
+    if (article.summary && article.summary.toLowerCase().includes('anxiety')) relevantContent.push(article.summary);
+    return relevantContent;
+  }
+
+  // Depression
+  if (topic === 'depression') {
+    if (article.content_blocks?.overview && article.content_blocks.overview.toLowerCase().includes('depression')) relevantContent.push(article.content_blocks.overview);
+    if (article.content_blocks?.symptoms_and_impact && article.content_blocks.symptoms_and_impact.toLowerCase().includes('depression')) relevantContent.push(article.content_blocks.symptoms_and_impact);
+    if (article.content_blocks?.practical_takeaways && article.content_blocks.practical_takeaways.toLowerCase().includes('depression')) relevantContent.push(article.content_blocks.practical_takeaways);
+    if (article.content_blocks?.practical_applications && article.content_blocks.practical_applications.toLowerCase().includes('depression')) relevantContent.push(article.content_blocks.practical_applications);
+    if (article.content_blocks?.how_it_works && article.content_blocks.how_it_works.toLowerCase().includes('depression')) relevantContent.push(article.content_blocks.how_it_works);
+    if (article.summary && article.summary.toLowerCase().includes('depression')) relevantContent.push(article.summary);
+    return relevantContent;
+  }
+
+  // General fallback: extract content based on query keywords
   if (processedQuery.includes('how') || processedQuery.includes('what') || processedQuery.includes('mechanism')) {
     if (article.content_blocks?.mechanisms) relevantContent.push(article.content_blocks.mechanisms);
     if (article.content_blocks?.how_it_works) relevantContent.push(article.content_blocks.how_it_works);
   }
-  
   if (processedQuery.includes('symptom') || processedQuery.includes('sign') || processedQuery.includes('experience') || processedQuery.includes('struggle')) {
     if (article.content_blocks?.symptoms_and_impact) relevantContent.push(article.content_blocks.symptoms_and_impact);
   }
-  
   if (processedQuery.includes('evidence') || processedQuery.includes('research') || processedQuery.includes('study')) {
     if (article.content_blocks?.evidence_summary) relevantContent.push(article.content_blocks.evidence_summary);
     if (article.content_blocks?.key_studies) relevantContent.push(article.content_blocks.key_studies);
   }
-  
   if (processedQuery.includes('help') || processedQuery.includes('treatment') || processedQuery.includes('solution')) {
     if (article.content_blocks?.practical_takeaways) relevantContent.push(article.content_blocks.practical_takeaways);
     if (article.content_blocks?.practical_applications) relevantContent.push(article.content_blocks.practical_applications);
   }
-
+  if (article.summary) relevantContent.push(article.summary);
   return relevantContent;
 }
 
 function generateAnswer(articles: Article[], query: string): string {
   const processedQuery = preprocessQuery(query);
-  const isSleepQuery = processedQuery.includes('sleep') || 
-                      processedQuery.includes('insomnia') || 
-                      processedQuery.includes('tired');
-  const isRacingThoughtsQuery = processedQuery.includes('race') || 
-                               processedQuery.includes('mind') || 
-                               processedQuery.includes('thought');
+  const topic = detectTopic(processedQuery);
+  const isSleepQuery = topic === 'sleep' || topic === 'insomnia' || processedQuery.includes('tired');
+  const isRacingThoughtsQuery = processedQuery.includes('race') || processedQuery.includes('mind') || processedQuery.includes('thought');
 
   // Sort articles by relevance and category
   const relevantArticles = articles
     .map(article => ({
       article,
       content: extractRelevantContent(article, query),
-      // Prioritize articles with practical advice for sleep and racing thoughts
-      categoryScore: isSleepQuery ? 
-        (article.category === 'brain_health' ? 3 : 
-         article.category === 'interventions' ? 2 : 
-         article.category === 'mental_health' ? 1.5 : 1) : 1
+      categoryScore: topic === 'sleep' ? (article.category === 'brain_health' ? 3 : article.category === 'interventions' ? 2 : article.category === 'mental_health' ? 1.5 : 1) : 1
     }))
     .filter(({ content }) => content.length > 0)
     .sort((a, b) => b.categoryScore - a.categoryScore);
 
   if (relevantArticles.length === 0) {
-    return "I couldn't find any specific information about sleep issues in our database. Please try rephrasing your query or ask about a different topic.";
+    return `I couldn't find any specific information about ${topic ? topic : 'your question'} in our database. Please try rephrasing your query or ask about a different topic.`;
   }
 
-  // Generate a conversational answer
   let answer = "";
-  
-  if (isSleepQuery) {
+  if (topic === 'sleep' || topic === 'insomnia') {
     answer = "Based on our research about sleep and mental health, ";
     
     // Group content by type and ensure it's sleep-related
@@ -339,17 +368,46 @@ function generateAnswer(articles: Article[], query: string): string {
                 "create a comfortable sleep environment, limit screen time before bed, and practice " +
                 "relaxation techniques. These practices can help manage both sleep difficulties and racing thoughts.";
     }
+  } else if (topic === 'adhd') {
+    answer = "Here's what we know about ADHD based on our research:\n\n";
+    const overview = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('overview'));
+    if (overview) answer += overview + "\n\n";
+    const symptoms = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('symptom'));
+    if (symptoms) answer += "Common symptoms: " + symptoms + "\n\n";
+    const practical = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('practical') || c.toLowerCase().includes('tip') || c.toLowerCase().includes('strategy'));
+    if (practical) answer += "Practical strategies: " + practical + "\n\n";
+    const how = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('how it works') || c.toLowerCase().includes('mechanism'));
+    if (how) answer += "How it works: " + how + "\n\n";
+    answer += "\nPlease note that while this information is based on research and expert knowledge, it's always best to consult with healthcare professionals for personalized advice.";
+  } else if (topic === 'anxiety') {
+    answer = "Here's what we know about anxiety based on our research:\n\n";
+    const overview = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('overview'));
+    if (overview) answer += overview + "\n\n";
+    const symptoms = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('symptom'));
+    if (symptoms) answer += "Common symptoms: " + symptoms + "\n\n";
+    const practical = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('practical') || c.toLowerCase().includes('tip') || c.toLowerCase().includes('strategy'));
+    if (practical) answer += "Practical strategies: " + practical + "\n\n";
+    const how = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('how it works') || c.toLowerCase().includes('mechanism'));
+    if (how) answer += "How it works: " + how + "\n\n";
+    answer += "\nPlease note that while this information is based on research and expert knowledge, it's always best to consult with healthcare professionals for personalized advice.";
+  } else if (topic === 'depression') {
+    answer = "Here's what we know about depression based on our research:\n\n";
+    const overview = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('overview'));
+    if (overview) answer += overview + "\n\n";
+    const symptoms = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('symptom'));
+    if (symptoms) answer += "Common symptoms: " + symptoms + "\n\n";
+    const practical = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('practical') || c.toLowerCase().includes('tip') || c.toLowerCase().includes('strategy'));
+    if (practical) answer += "Practical strategies: " + practical + "\n\n";
+    const how = relevantArticles.flatMap(({ content }) => content).find(c => c.toLowerCase().includes('how it works') || c.toLowerCase().includes('mechanism'));
+    if (how) answer += "How it works: " + how + "\n\n";
+    answer += "\nPlease note that while this information is based on research and expert knowledge, it's always best to consult with healthcare professionals for personalized advice.";
   } else {
-    // Default answer generation for other queries
-    answer = "Based on our research and content, ";
-    const mainArticle = relevantArticles[0];
-    if (mainArticle.content[0]) {
-      answer += mainArticle.content[0].toLowerCase();
-    }
+    // General fallback
+    answer = `Here's what we found based on your question:\n\n`;
+    const general = relevantArticles.flatMap(({ content }) => content).slice(0, 3).join('\n\n');
+    answer += general;
+    answer += "\n\nPlease note that while this information is based on research and expert knowledge, it's always best to consult with healthcare professionals for personalized advice.";
   }
-
-  // Add a note about consulting professionals
-  answer += "\n\nPlease note that while this information is based on research and expert knowledge, it's always best to consult with healthcare professionals for personalized advice.";
 
   return answer;
 }

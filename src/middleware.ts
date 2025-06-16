@@ -17,58 +17,40 @@ export async function middleware(request: NextRequest) {
           return request.cookies.get(name)?.value;
         },
         set(name: string, value: string, options: CookieOptions) {
-          response.cookies.set({ name, value, ...options });
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          });
         },
         remove(name: string, options: CookieOptions) {
-          response.cookies.set({ name, value: '', ...options });
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          });
         },
       },
     }
   );
 
-  // Get the current path
-  const path = request.nextUrl.pathname;
+  const { data: { user }, error } = await supabase.auth.getUser();
 
-  // Skip middleware for static files and API routes
-  if (path.startsWith('/_next') || path.startsWith('/api') || path.startsWith('/static') || path.includes('.')) {
-    return response;
+  // If user is not signed in and the current path is not /login,
+  // redirect the user to /login
+  if (!user && !request.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/login', request.url));
   }
 
-  // Define public paths that don't require authentication
-  const publicPaths = ['/auth/login', '/auth/signup', '/auth/callback', '/'];
-  const isPublicPath = publicPaths.some(publicPath => path === publicPath);
-
-  // Get the session
-  const { data: { session } } = await supabase.auth.getSession();
-  console.log('DEBUG: Session in middleware:', session);
-
-  // Only redirect authenticated users away from /auth/login or /auth/signup if there is NO redirect query param
-  if (session && (path === '/auth/login' || path === '/auth/signup') && !request.nextUrl.searchParams.get('redirect')) {
-    return NextResponse.redirect(new URL('/profile', request.url));
-  }
-
-  // If the user is not signed in and tries to access protected pages, redirect to login
-  if (!session && path === '/profile') {
-    return NextResponse.redirect(new URL('/auth/login', request.url));
-  }
-
-  // If the user is signed out and tries to access the sign out page, redirect to home
-  if (!session && path === '/auth/signout') {
-    return NextResponse.redirect(new URL('/', request.url));
+  // If user is signed in and the current path is /login,
+  // redirect the user to /brain-journal
+  if (user && request.nextUrl.pathname.startsWith('/login')) {
+    return NextResponse.redirect(new URL('/brain-journal', request.url));
   }
 
   return response;
 }
 
 export const config = {
-  matcher: [
-    /*
-     * Match all request paths except:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public folder
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public/).*)',
-  ],
+  matcher: ['/brain-journal/:path*', '/login/:path*'],
 }; 
