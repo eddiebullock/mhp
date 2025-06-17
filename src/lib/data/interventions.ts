@@ -67,13 +67,7 @@ export async function getInterventions(category: keyof typeof categoryMap) {
       ? 'Limited'
       : 'Insufficient',
     studyCount: article.content_blocks?.key_studies?.split('\n').length || 0,
-    reliabilityRating: article.content_blocks?.effectiveness?.toLowerCase().includes('high')
-      ? 5
-      : article.content_blocks?.effectiveness?.toLowerCase().includes('moderate')
-      ? 4
-      : article.content_blocks?.effectiveness?.toLowerCase().includes('limited')
-      ? 3
-      : 2,
+    reliabilityRating: article.content_blocks?.reliability_score || 3,
     conditions: article.tags || [],
     summary: article.summary || '',
     content: article.content_blocks,
@@ -124,13 +118,7 @@ export async function getInterventionsByCondition(
       ? 'Limited'
       : 'Insufficient',
     studyCount: article.content_blocks?.key_studies?.split('\n').length || 0,
-    reliabilityRating: article.content_blocks?.effectiveness?.toLowerCase().includes('high')
-      ? 5
-      : article.content_blocks?.effectiveness?.toLowerCase().includes('moderate')
-      ? 4
-      : article.content_blocks?.effectiveness?.toLowerCase().includes('limited')
-      ? 3
-      : 2,
+    reliabilityRating: article.content_blocks?.reliability_score || 3,
     conditions: article.tags || [],
     summary: article.summary || '',
     content: article.content_blocks,

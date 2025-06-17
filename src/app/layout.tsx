@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
+import { MagnifyingGlassIcon, UserIcon } from '@heroicons/react/24/outline';
 import './globals.css';
 
 export default function RootLayout({
@@ -62,10 +63,11 @@ export default function RootLayout({
                 </Link>
                 <div className="hidden sm:ml-6 sm:flex sm:space-x-8">
                   <Link
-                    href="/articles"
+                    href="/feed"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
-                    Search
+                    <MagnifyingGlassIcon className="h-4 w-4 mr-1" />
+                    Feed
                   </Link>
                   <Link
                     href="/evidence"
@@ -74,10 +76,10 @@ export default function RootLayout({
                     Evidence
                   </Link>
                   <Link
-                    href="/feed"
+                    href="/topics"
                     className="border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700 inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium"
                   >
-                    Feed
+                    Topics
                   </Link>
                 </div>
               </div>
@@ -89,6 +91,13 @@ export default function RootLayout({
                         <span className="text-sm text-gray-500">
                           Signed in as {user.email}
                         </span>
+                        <Link
+                          href="/profile"
+                          className="inline-flex items-center px-3 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                        >
+                          <UserIcon className="h-4 w-4 mr-1" />
+                          Profile
+                        </Link>
                         <button
                           onClick={handleSignOut}
                           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
