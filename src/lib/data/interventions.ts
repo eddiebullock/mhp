@@ -6,6 +6,7 @@ type Article = Database['public']['Tables']['articles']['Row'];
 
 export type Intervention = {
   id: string;
+  slug: string;
   title: string;
   category: ArticleCategory;
   evidenceStrength: 'Strong' | 'Moderate' | 'Limited' | 'Insufficient';
@@ -55,6 +56,7 @@ export async function getInterventions(category: keyof typeof categoryMap) {
   // Transform the data to match our Intervention type
   return data.map((article): Intervention => ({
     id: article.id,
+    slug: article.slug,
     title: article.title,
     category: article.category,
     evidenceStrength: article.content_blocks?.evidence_summary?.toLowerCase().includes('strong') 
@@ -111,6 +113,7 @@ export async function getInterventionsByCondition(
 
   return data.map((article): Intervention => ({
     id: article.id,
+    slug: article.slug,
     title: article.title,
     category: article.category,
     evidenceStrength: article.content_blocks?.evidence_summary?.toLowerCase().includes('strong') 

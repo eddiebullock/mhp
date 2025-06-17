@@ -425,8 +425,37 @@ export async function semanticSearch(query: string): Promise<{ answer: string; a
     
     // Get query embedding
     console.log('Getting query embedding...');
-    const queryEmbedding = await getQueryEmbedding(processedQuery);
-    console.log('Query embedding generated, length:', queryEmbedding.length);
+    let queryEmbedding;
+    try {
+      queryEmbedding = await getQueryEmbedding(processedQuery);
+      console.log('Query embedding generated, length:', queryEmbedding.length);
+    } catch (error) {
+      console.error('Error generating query embedding:', error);
+      // Fallback to keyword search if embedding fails
+      const { data: articles, error: searchError } = await supabase
+        .from('articles')
+        .select('*')
+        .eq('status', 'published')
+        .or(`
+          title.ilike.%${processedQuery}%,
+          summary.ilike.%${processedQuery}%,
+          content_blocks->>'overview'.ilike.%${processedQuery}%,
+          content_blocks->>'definition'.ilike.%${processedQuery}%,
+          content_blocks->>'mechanisms'.ilike.%${processedQuery}%
+        `)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (searchError) throw searchError;
+      if (!articles || articles.length === 0) {
+        throw new Error('No articles found matching your search');
+      }
+
+      return {
+        answer: generateAnswer(articles, query),
+        articles
+      };
+    }
 
     // Get all published articles with their embeddings
     console.log('Fetching articles from database...');
@@ -437,112 +466,88 @@ export async function semanticSearch(query: string): Promise<{ answer: string; a
 
     if (error) {
       console.error('Database error:', error);
-      throw new Error('Failed to fetch articles from the database');
+      throw new Error('Unable to access our article database. Please try again in a few moments.');
     }
 
     if (!articles || articles.length === 0) {
       console.error('No articles found in database');
-      throw new Error('No articles found in the database');
+      throw new Error('No articles found in the database. Please try again later.');
     }
 
     console.log(`Found ${articles.length} articles`);
 
     // Calculate similarity scores using the pre-computed embeddings
     const articlesWithScores = articles.map(article => {
-      // Parse and validate embeddings
-      const titleEmbedding = parseEmbedding(article.title_embedding);
-      const contentEmbedding = parseEmbedding(article.content_embedding);
-      const summaryEmbedding = parseEmbedding(article.summary_embedding);
-      
-      // Calculate similarities
-      const titleSimilarity = titleEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, titleEmbedding) : 0;
-      const contentSimilarity = contentEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, contentEmbedding) : 0;
-      const summarySimilarity = summaryEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, summaryEmbedding) : 0;
-
-      // For sleep-related queries, adjust weights and boost scores
-      const isSleepQuery = processedQuery.includes('sleep') || 
-                          processedQuery.includes('insomnia') || 
-                          processedQuery.includes('tired');
-      const isRacingThoughtsQuery = processedQuery.includes('race') || 
-                                   processedQuery.includes('mind') || 
-                                   processedQuery.includes('thought');
-      
-      // Adjust weights based on category for sleep queries
-      let weights = { title: 0.3, summary: 0.3, content: 0.4 };
-      if (isSleepQuery) {
-        if (article.category === 'brain_health') {
-          weights = { title: 0.2, summary: 0.2, content: 0.6 }; // Much more weight on content
-        } else if (article.category === 'interventions') {
-          weights = { title: 0.25, summary: 0.25, content: 0.5 }; // More weight on content
-        }
-      }
-
-      let similarity = (titleSimilarity * weights.title) + 
-                      (summarySimilarity * weights.summary) + 
-                      (contentSimilarity * weights.content);
-
-      // Boost similarity for articles that explicitly mention sleep or racing thoughts
-      if (isSleepQuery) {
-        const articleText = (article.title + ' ' + article.summary + ' ' + 
-                           JSON.stringify(article.content_blocks)).toLowerCase();
+      try {
+        // Parse and validate embeddings
+        const titleEmbedding = parseEmbedding(article.title_embedding);
+        const contentEmbedding = parseEmbedding(article.content_embedding);
+        const summaryEmbedding = parseEmbedding(article.summary_embedding);
         
-        // Strong boost for sleep-related content
-        if (isSleepRelatedContent(articleText)) {
-          similarity *= 2.0; // Double the similarity for sleep-related content
+        // Calculate similarities
+        const titleSimilarity = titleEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, titleEmbedding) : 0;
+        const contentSimilarity = contentEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, contentEmbedding) : 0;
+        const summarySimilarity = summaryEmbedding.length > 0 ? cosineSimilarity(queryEmbedding, summaryEmbedding) : 0;
+
+        // Adjust weights based on query type
+        const weights = {
+          title: 0.3,
+          summary: 0.3,
+          content: 0.4
+        };
+
+        // Boost weights for specific query types
+        if (processedQuery.includes('how') || processedQuery.includes('what') || processedQuery.includes('mechanism')) {
+          weights.content = 0.5;
+          weights.title = 0.2;
+          weights.summary = 0.3;
+        } else if (processedQuery.includes('treatment') || processedQuery.includes('help') || processedQuery.includes('solution')) {
+          weights.content = 0.5;
+          weights.title = 0.2;
+          weights.summary = 0.3;
         }
-        
-        // Additional boost for racing thoughts
-        if (isRacingThoughtsQuery && isRacingThoughtsContent(articleText)) {
+
+        let similarity = (titleSimilarity * weights.title) + 
+                        (summarySimilarity * weights.summary) + 
+                        (contentSimilarity * weights.content);
+
+        // Boost similarity for exact matches in title or summary
+        const articleText = (article.title + ' ' + article.summary).toLowerCase();
+        if (articleText.includes(processedQuery.toLowerCase())) {
           similarity *= 1.5;
         }
-        
-        // Category boost
-        if (article.category === 'brain_health') {
-          similarity *= 2.0; // Double the similarity for brain_health category
-        } else if (article.category === 'interventions') {
-          similarity *= 1.5;
-        }
-      }
 
-      return { article, similarity };
+        return { article, similarity };
+      } catch (error) {
+        console.error('Error calculating similarity for article:', article.id, error);
+        return { article, similarity: 0 };
+      }
     });
 
     // Sort articles by similarity score
-    const sortedArticles = articlesWithScores.sort((a, b) => b.similarity - a.similarity);
+    const sortedArticles = articlesWithScores
+      .filter(({ similarity }) => !isNaN(similarity))
+      .sort((a, b) => b.similarity - a.similarity);
+
     console.log('Top 3 article similarities:', sortedArticles.slice(0, 3).map(a => ({
       title: a.article.title,
       category: a.article.category,
-      similarity: a.similarity,
-      isSleepRelated: isSleepRelatedContent(a.article.title + ' ' + a.article.summary)
+      similarity: a.similarity
     })));
 
-    // Use a higher threshold for sleep-related queries to ensure relevance
-    const isSleepQuery = processedQuery.includes('sleep') || 
-                        processedQuery.includes('insomnia') || 
-                        processedQuery.includes('tired');
-    const threshold = isSleepQuery ? 0.2 : 0.15; // Higher threshold for sleep queries
+    // Use a dynamic threshold based on the top similarity score
+    const topSimilarity = sortedArticles[0]?.similarity || 0;
+    const threshold = Math.max(0.15, topSimilarity * 0.3); // At least 0.15 or 30% of top similarity
 
     const relevantArticles = sortedArticles
-      .filter(({ similarity, article }) => {
-        // For sleep queries, only include articles that are actually about sleep
-        if (isSleepQuery) {
-          const articleText = article.title + ' ' + article.summary;
-          return similarity > threshold && isSleepRelatedContent(articleText);
-        }
-        return similarity > threshold;
-      })
+      .filter(({ similarity }) => similarity > threshold)
       .map(({ article }) => article);
 
     console.log(`Found ${relevantArticles.length} relevant articles above threshold ${threshold}`);
 
     if (relevantArticles.length === 0) {
-      console.log('No articles met threshold, using fallback articles');
-      // If no articles meet the similarity threshold, return the top 3 most similar articles that are actually about sleep
+      // If no articles meet the similarity threshold, return the top 3 most similar articles
       const fallbackArticles = sortedArticles
-        .filter(({ article }) => {
-          const articleText = article.title + ' ' + article.summary;
-          return isSleepQuery ? isSleepRelatedContent(articleText) : true;
-        })
         .slice(0, 3)
         .map(({ article }) => article);
 
@@ -564,10 +569,10 @@ export async function semanticSearch(query: string): Promise<{ answer: string; a
   } catch (error) {
     console.error('Semantic search error:', error);
     if (error instanceof Error) {
-      if (error.message.includes('Failed to fetch articles')) {
+      if (error.message.includes('Unable to access')) {
         throw new Error('Unable to access our article database. Please try again in a few moments.');
       } else if (error.message.includes('No articles found')) {
-        throw new Error('We couldn\'t find any relevant articles. Please try a different search term.');
+        throw new Error('We couldn\'t find any relevant articles. Please try a different search term or rephrase your question.');
       }
     }
     throw new Error('We\'re having trouble processing your question. Please try rephrasing it or use more specific terms.');

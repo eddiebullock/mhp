@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import CollapsibleTable, { Column } from '@/components/tables/CollapsibleTable';
 import { Intervention, getInterventions, getInterventionsByCondition } from '@/lib/data/interventions';
+import Link from 'next/link';
 
 type TabType = 'lifestyle' | 'clinical' | 'risk_factor';
 
@@ -14,7 +15,9 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => (
         <div>
-          <div className="font-medium text-gray-900">{String(value)}</div>
+          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
+            {String(value)}
+          </Link>
           <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
         </div>
       ),
@@ -75,7 +78,9 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => (
         <div>
-          <div className="font-medium text-gray-900">{String(value)}</div>
+          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
+            {String(value)}
+          </Link>
           <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
           {item.content?.risks_and_limitations && (
             <div className="text-red-500 text-sm mt-1">
@@ -165,7 +170,9 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => (
         <div>
-          <div className="font-medium text-gray-900">{String(value)}</div>
+          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
+            {String(value)}
+          </Link>
           <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
         </div>
       ),
@@ -249,9 +256,19 @@ const filterOptions = [
   { label: 'All Conditions', value: '' },
   { label: 'Depression', value: 'depression' },
   { label: 'Anxiety', value: 'anxiety' },
-  { label: 'Mood', value: 'mood' },
   { label: 'PTSD', value: 'ptsd' },
   { label: 'OCD', value: 'ocd' },
+  { label: 'ADHD', value: 'adhd' },
+  { label: 'Bipolar Disorder', value: 'bipolar' },
+  { label: 'Eating Disorders', value: 'eating_disorder' },
+  { label: 'Sleep Disorders', value: 'sleep_disorder' },
+  { label: 'Substance Use', value: 'substance_use' },
+  { label: 'Personality Disorders', value: 'personality_disorder' },
+  { label: 'Schizophrenia', value: 'schizophrenia' },
+  { label: 'Autism Spectrum', value: 'autism' },
+  { label: 'Stress', value: 'stress' },
+  { label: 'Trauma', value: 'trauma' },
+  { label: 'Mood Disorders', value: 'mood_disorder' },
 ];
 
 const tabTitles = {

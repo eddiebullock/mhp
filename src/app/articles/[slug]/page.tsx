@@ -3,12 +3,13 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound } from 'next/navigation';
 import { Database } from '@/types/supabase';
 import ReactMarkdown from 'react-markdown';
+import ArticleClient from './ArticleClient';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 
-export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const supabase = await createClient();
-  const slug = params.slug;
+  const { slug } = await params;
   
   const { data: article } = await supabase
     .from('articles')
@@ -41,9 +42,9 @@ export async function generateMetadata({ params }: { params: { slug: string } })
   };
 }
 
-export default async function ArticlePage({ params }: { params: { slug: string } }) {
+export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
   const supabase = await createClient();
-  const slug = params.slug;
+  const { slug } = await params;
   
   const { data: article, error } = await supabase
     .from('articles')
@@ -55,220 +56,27 @@ export default async function ArticlePage({ params }: { params: { slug: string }
     notFound();
   }
 
-  const getCategoryType = (category: string): string => {
-    const normalizedCategory = category.toLowerCase().trim();
+  // Check if user is an editor
+  const { data: { session } } = await supabase.auth.getSession();
+  let isEditor = false;
+
+  console.log('Article page - Session:', session?.user?.id);
+  console.log('Article page - User email:', session?.user?.email);
+
+  if (session?.user) {
+    const { data: editorData, error: editorError } = await supabase
+      .from('article_editors')
+      .select('id')
+      .eq('user_id', session.user.id)
+      .single();
     
-    // Handle neuroscience category
-    if (normalizedCategory === 'neuroscience' || 
-        normalizedCategory === 'psychology' || 
-        normalizedCategory.includes('neuroscience') || 
-        normalizedCategory.includes('psychology')) {
-      return 'neuroscience';
-    }
+    console.log('Article page - Editor data:', editorData);
+    console.log('Article page - Editor error:', editorError);
     
-    // Handle mental health category
-    if (normalizedCategory === 'mental health' || 
-        normalizedCategory === 'mental_health' || 
-        normalizedCategory.includes('mental health') || 
-        normalizedCategory.includes('mental_health')) {
-      return 'mental health';
-    }
-    
-    // Handle intervention category
-    if (normalizedCategory === 'intervention' || 
-        normalizedCategory.includes('intervention')) {
-      return 'intervention';
-    }
-    
-    // Handle lifestyle factor category
-    if (normalizedCategory === 'lifestyle factor' || 
-        normalizedCategory === 'lifestyle_factor' || 
-        normalizedCategory.includes('lifestyle')) {
-      return 'lifestyle factor';
-    }
-    
-    // Handle lab & testing category
-    if (normalizedCategory === 'lab & testing' || 
-        normalizedCategory === 'lab_and_testing' || 
-        normalizedCategory.includes('lab') || 
-        normalizedCategory.includes('testing')) {
-      return 'lab & testing';
-    }
-    
-    return normalizedCategory;
-  };
+    isEditor = !!editorData;
+  }
 
-  const renderContent = () => {
-    const blocks = article.content_blocks;
-    if (!blocks) return null;
+  console.log('Article page - Is editor:', isEditor);
 
-    return (
-      <div className="prose max-w-none">
-        {blocks.key_evidence && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Key Evidence</h2>
-            <ReactMarkdown>{blocks.key_evidence}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.practical_takeaways && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Practical Takeaways</h2>
-            <ReactMarkdown>{blocks.practical_takeaways}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.overview && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Overview</h2>
-            <ReactMarkdown>{blocks.overview}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.definition && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Definition</h2>
-            <ReactMarkdown>{blocks.definition}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.mechanisms && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Mechanisms</h2>
-            <ReactMarkdown>{blocks.mechanisms}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.prevalence && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Prevalence</h2>
-            <ReactMarkdown>{blocks.prevalence}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.causes_and_mechanisms && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Causes and Mechanisms</h2>
-            <ReactMarkdown>{blocks.causes_and_mechanisms}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.symptoms_and_impact && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Symptoms and Impact</h2>
-            <ReactMarkdown>{blocks.symptoms_and_impact}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.evidence_summary && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Evidence Summary</h2>
-            <ReactMarkdown>{blocks.evidence_summary}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.common_myths && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Common Myths</h2>
-            <ReactMarkdown>{blocks.common_myths}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.future_directions && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Future Directions</h2>
-            <ReactMarkdown>{blocks.future_directions}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.strengths_and_limitations && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Strengths and Limitations</h2>
-            <ReactMarkdown>{blocks.strengths_and_limitations}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.core_principles && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Core Principles</h2>
-            <ReactMarkdown>{blocks.core_principles}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.key_studies_and_theories && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Key Studies and Theories</h2>
-            <ReactMarkdown>{blocks.key_studies_and_theories}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.safety && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Safety</h2>
-            <ReactMarkdown>{blocks.safety}</ReactMarkdown>
-          </section>
-        )}
-
-        {blocks.faqs && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">Frequently Asked Questions</h2>
-            <div className="space-y-4">
-              {blocks.faqs.map((faq: { question: string; answer: string }, index: number) => (
-                <div key={index} className="border-l-4 border-indigo-500 pl-4">
-                  <h3 className="font-semibold mb-2">{faq.question}</h3>
-                  <p className="text-gray-600">{faq.answer}</p>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        {blocks.references_and_resources && (
-          <section className="mb-8">
-            <h2 className="text-2xl font-bold mb-4">References and Resources</h2>
-            <ReactMarkdown>{blocks.references_and_resources}</ReactMarkdown>
-          </section>
-        )}
-      </div>
-    );
-  };
-
-  return (
-    <article className="min-h-screen bg-gray-50">
-      <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow rounded-lg overflow-hidden">
-          <div className="px-6 py-8">
-            <div className="mb-4">
-              <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
-                {article.category}
-              </span>
-            </div>
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{article.title}</h1>
-            <p className="text-lg text-gray-900 mb-6">{article.summary}</p>
-            
-            <div className="flex flex-wrap gap-2 mb-8">
-              {(article.tags || []).map((tag: string) => (
-                <span
-                  key={tag}
-                  className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800"
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
-
-            <div className="prose prose-gray max-w-none [&_*]:text-black [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900">
-              {renderContent()}
-            </div>
-
-            <div className="mt-8 pt-6 border-t border-gray-200">
-              <p className="text-sm text-gray-900">
-                Published: {new Date(article.created_at).toLocaleDateString()}
-              </p>
-            </div>
-          </div>
-        </div>
-      </main>
-    </article>
-  );
+  return <ArticleClient article={article} isEditor={isEditor} />;
 } 
