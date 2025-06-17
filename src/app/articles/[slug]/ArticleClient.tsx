@@ -52,8 +52,11 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
       return <p className="text-gray-500">No content available.</p>;
     }
 
-    const contentBlocks = currentArticle.content_blocks as Record<string, string>;
-    const contentFields = Object.keys(contentBlocks).filter(key => contentBlocks[key]?.trim());
+    const contentBlocks = currentArticle.content_blocks as Record<string, any>;
+    const contentFields = Object.keys(contentBlocks).filter(key => {
+      const value = contentBlocks[key];
+      return typeof value === 'string' && value.trim().length > 0;
+    });
 
     if (contentFields.length === 0) {
       return <p className="text-gray-500">No content available.</p>;
@@ -71,7 +74,7 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
       <div className="prose prose-gray max-w-none [&_*]:text-black [&_h2]:text-gray-900 [&_h3]:text-gray-900 [&_h4]:text-gray-900">
         <div className="prose max-w-none">
           {contentFields.map((fieldName) => {
-            const content = contentBlocks[fieldName];
+            const content = contentBlocks[fieldName] as string;
             const displayName = getFieldDisplayName(fieldName);
             
             return (
