@@ -13,12 +13,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'title',
       header: 'Intervention',
       sortable: true,
+      className: 'w-1/3 max-w-xs',
       render: (value: any, item: Intervention) => (
-        <div>
-          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
-            {String(value)}
+        <div className="break-words">
+          <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
+            {item.title}
           </Link>
-          <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
         </div>
       ),
     },
@@ -57,15 +57,25 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
+        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        
         return (
           <div className="flex items-center">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-indigo-600 h-2.5 rounded-full"
-                style={{ width: `${rating * 20}%` }}
-              ></div>
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">{rating}/5</span>
+            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
           </div>
         );
       },
@@ -76,17 +86,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'title',
       header: 'Intervention',
       sortable: true,
+      className: 'w-1/3 max-w-xs',
       render: (value: any, item: Intervention) => (
-        <div>
-          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
-            {String(value)}
+        <div className="break-words">
+          <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
+            {item.title}
           </Link>
-          <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
-          {item.content?.risks_and_limitations && (
-            <div className="text-red-500 text-sm mt-1">
-              Side Effects: {item.content.risks_and_limitations}
-            </div>
-          )}
         </div>
       ),
     },
@@ -149,15 +154,25 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
+        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        
         return (
           <div className="flex items-center">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-indigo-600 h-2.5 rounded-full"
-                style={{ width: `${rating * 20}%` }}
-              ></div>
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">{rating}/5</span>
+            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
           </div>
         );
       },
@@ -168,12 +183,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'title',
       header: 'Risk Factor',
       sortable: true,
+      className: 'w-1/3 max-w-xs',
       render: (value: any, item: Intervention) => (
-        <div>
-          <Link href={`/articles/${item.slug}`} className="font-medium text-indigo-600 hover:text-indigo-800">
-            {String(value)}
+        <div className="break-words">
+          <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
+            {item.title}
           </Link>
-          <div className="text-gray-500 text-sm mt-1">{item.summary}</div>
         </div>
       ),
     },
@@ -181,6 +196,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'content',
       header: 'Category',
       sortable: true,
+      className: 'w-1/6',
       render: (value: any, item: Intervention) => {
         const category = value?.category || 'Unknown';
         const colors = {
@@ -205,6 +221,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'evidenceStrength',
       header: 'Correlation',
       sortable: true,
+      className: 'w-1/6',
       render: (value: any, item: Intervention) => {
         const strength = item.evidenceStrength;
         const colors = {
@@ -228,7 +245,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'studyCount',
       header: 'Studies',
       sortable: true,
-      className: 'text-center',
+      className: 'w-1/12 text-center',
     },
     {
       key: 'reliabilityRating',
@@ -236,15 +253,25 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
+        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        
         return (
           <div className="flex items-center">
-            <div className="w-full bg-gray-200 rounded-full h-2.5">
-              <div
-                className="bg-indigo-600 h-2.5 rounded-full"
-                style={{ width: `${rating * 20}%` }}
-              ></div>
+            <div className="flex">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <svg
+                  key={star}
+                  className={`h-4 w-4 ${
+                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
+                  }`}
+                  fill="currentColor"
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                </svg>
+              ))}
             </div>
-            <span className="ml-2 text-sm text-gray-600">{rating}/5</span>
+            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
           </div>
         );
       },

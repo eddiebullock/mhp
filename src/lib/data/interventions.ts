@@ -82,11 +82,12 @@ export async function getInterventionsByCondition(
 ) {
   const dbCategory = categoryMap[category];
   
+  console.log(`Filtering ${category} for condition: ${condition}`);
+  
   let query = supabase
     .from('articles')
     .select('*')
     .eq('status', 'published')
-    .contains('tags', [condition])
     .order('created_at', { ascending: false });
 
   // For risk factors, we need to filter by both category and risk factor tag
@@ -105,7 +106,44 @@ export async function getInterventionsByCondition(
     throw error;
   }
 
-  return data.map((article): Intervention => ({
+  console.log(`Found ${data?.length || 0} articles in category ${category}`);
+
+  // Filter by condition on the client side for more flexibility
+  const filteredData = data.filter((article) => {
+    const tags = article.tags || [];
+    const title = article.title?.toLowerCase() || '';
+    const summary = article.summary?.toLowerCase() || '';
+    const contentBlocks = JSON.stringify(article.content_blocks || {}).toLowerCase();
+    
+    // Check multiple sources for the condition
+    const conditionLower = condition.toLowerCase();
+    
+    // Check tags
+    const tagMatch = tags.some((tag: string) => 
+      tag.toLowerCase().includes(conditionLower)
+    );
+    
+    // Check title
+    const titleMatch = title.includes(conditionLower);
+    
+    // Check summary
+    const summaryMatch = summary.includes(conditionLower);
+    
+    // Check content blocks
+    const contentMatch = contentBlocks.includes(conditionLower);
+    
+    const isMatch = tagMatch || titleMatch || summaryMatch || contentMatch;
+    
+    if (isMatch) {
+      console.log(`Match found: ${article.title} (tags: ${tags.join(', ')})`);
+    }
+    
+    return isMatch;
+  });
+
+  console.log(`Filtered to ${filteredData.length} articles for condition: ${condition}`);
+
+  return filteredData.map((article): Intervention => ({
     id: article.id,
     slug: article.slug,
     title: article.title,

@@ -9,6 +9,10 @@ export default function HomePage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState('');
   const [placeholder, setPlaceholder] = useState('');
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  const supabase = createClient();
 
   const searchTopics = [
     'ADHD',
@@ -22,6 +26,36 @@ export default function HomePage() {
     'mindfulness',
     'psychology'
   ];
+
+  useEffect(() => {
+    const checkUser = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        setUser(session?.user ?? null);
+        
+        // If user is logged in, redirect to feed
+        if (session?.user) {
+          router.replace('/feed');
+          return;
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkUser();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        router.replace('/feed');
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [router, supabase.auth]);
 
   useEffect(() => {
     let currentIndex = 0;
@@ -60,9 +94,18 @@ export default function HomePage() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchQuery.trim()) {
-      router.push(`/articles?search=${encodeURIComponent(searchQuery)}`);
+      router.push(`/feed?search=${encodeURIComponent(searchQuery)}`);
     }
   };
+
+  // Show loading or redirect if user is logged in
+  if (loading || user) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -96,7 +139,7 @@ export default function HomePage() {
 
           <div className="mt-10">
             <Link
-              href="/articles"
+              href="/feed"
               className="inline-flex items-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700"
             >
               Browse Articles
