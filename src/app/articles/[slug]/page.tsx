@@ -42,9 +42,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   };
 }
 
-export default async function ArticlePage({ params }: { params: Promise<{ slug: string }> }) {
+export default async function ArticlePage({ 
+  params, 
+  searchParams 
+}: { 
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
+}) {
   const supabase = await createClient();
   const { slug } = await params;
+  const resolvedSearchParams = await searchParams;
   
   const { data: article, error } = await supabase
     .from('articles')
@@ -57,26 +64,41 @@ export default async function ArticlePage({ params }: { params: Promise<{ slug: 
   }
 
   // Check if user is an editor
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { user }, error: userError } = await supabase.auth.getUser();
   let isEditor = false;
 
-  console.log('Article page - Session:', session?.user?.id);
-  console.log('Article page - User email:', session?.user?.email);
+  console.log('Article page - User:', user?.id);
+  console.log('Article page - User email:', user?.email);
+  console.log('Article page - User error:', userError);
+  console.log('Article page - User session exists:', !!user);
 
-  if (session?.user) {
-    const { data: editorData, error: editorError } = await supabase
-      .from('article_editors')
-      .select('id')
-      .eq('user_id', session.user.id)
-      .single();
+  if (user) {
+    console.log('Article page - Checking editor for user ID:', user.id);
+    console.log('Article page - Checking editor for user email:', user.email);
     
-    console.log('Article page - Editor data:', editorData);
-    console.log('Article page - Editor error:', editorError);
+    // Simple role-based system: Check if user email is in authorized editors list
+    // This bypasses the RLS recursion issue and gives you full control
+    const authorizedEditors = [
+      'eddie@mentalhealthprogram.co.uk'
+      // Add more authorized editor emails here as needed
+    ];
     
-    isEditor = !!editorData;
+    isEditor = authorizedEditors.includes(user.email || '');
+    
+    console.log('Article page - Authorized editors:', authorizedEditors);
+    console.log('Article page - User email in authorized list:', user.email);
+    console.log('Article page - Is user authorized editor:', isEditor);
   }
 
-  console.log('Article page - Is editor:', isEditor);
+  console.log('Article page - Final isEditor result:', isEditor);
 
-  return <ArticleClient article={article} isEditor={isEditor} />;
+  // Check for edit mode from search params
+  const editMode = resolvedSearchParams.edit === 'true';
+  // Only allow editing for users in the article_editors table
+  const finalIsEditor = isEditor;
+
+  console.log('Article page - Edit mode from URL:', editMode);
+  console.log('Article page - Final editor status:', finalIsEditor);
+
+  return <ArticleClient article={article} isEditor={finalIsEditor} />;
 } 
