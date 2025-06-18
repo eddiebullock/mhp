@@ -7,10 +7,19 @@ create index if not exists idx_articles_category_id on articles (category_id);
 -- Add index for tags (if frequently used for filtering)
 create index if not exists idx_articles_tags on articles using gin (tags);
 
--- Add a constraint for status
-alter table articles
-  add constraint status_check
-  check (status in ('published', 'draft', 'archived'));
+-- Add a constraint for status (only if it doesn't exist)
+DO $$ 
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_constraint 
+        WHERE conname = 'status_check' 
+        AND conrelid = 'articles'::regclass
+    ) THEN
+        alter table articles
+          add constraint status_check
+          check (status in ('published', 'draft', 'archived'));
+    END IF;
+END $$;
 
 -- Set default for created_at and updated_at
 alter table articles
@@ -26,6 +35,7 @@ begin
 end;
 $$ language plpgsql;
 
+drop trigger if exists update_articles_updated_at on articles;
 create trigger update_articles_updated_at
   before update on articles
   for each row

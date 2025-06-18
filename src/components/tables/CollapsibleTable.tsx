@@ -5,7 +5,7 @@ import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline';
 
 export type Column<T> = {
   key: keyof T;
-  header: string;
+  header: string | React.ReactNode;
   render?: (value: T[keyof T], item: T) => React.ReactNode;
   sortable?: boolean;
   className?: string;
@@ -72,13 +72,14 @@ export default function CollapsibleTable<T extends { id: string | number }>({
   };
 
   return (
-    <div className={`bg-white rounded-lg shadow ${className}`}>
-      <div className="p-4 border-b border-gray-200">
-        <div className="flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-900">{title}</h3>
+    <div className={`bg-white rounded-xl shadow-lg border border-gray-100 ${className}`}>
+      <div className="p-6 border-b border-gray-200">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-xl font-semibold text-gray-900">{title}</h3>
           <button
             onClick={() => setIsExpanded(!isExpanded)}
-            className="p-1 rounded-full hover:bg-gray-100"
+            className="p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            aria-label={isExpanded ? 'Collapse table' : 'Expand table'}
           >
             {isExpanded ? (
               <ChevronUpIcon className="h-5 w-5 text-gray-500" />
@@ -89,15 +90,15 @@ export default function CollapsibleTable<T extends { id: string | number }>({
         </div>
         
         {filterOptions && (
-          <div className="mt-4 flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
             {filterOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => handleFilterChange(option.value)}
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
+                className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   activeFilter === option.value
-                    ? 'bg-indigo-100 text-indigo-800'
-                    : 'bg-gray-100 text-gray-800 hover:bg-gray-200'
+                    ? 'bg-indigo-100 text-indigo-800 border border-indigo-200'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-200'
                 }`}
               >
                 {option.label}
@@ -116,19 +117,19 @@ export default function CollapsibleTable<T extends { id: string | number }>({
                   <th
                     key={String(column.key)}
                     scope="col"
-                    className={`px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider ${
+                    className={`px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider ${
                       column.className || ''
                     }`}
                   >
-                    {column.sortable ? (
+                    {column.sortable && typeof column.header === 'string' ? (
                       <button
                         onClick={() => handleSort(column.key)}
-                        className="group inline-flex items-center"
+                        className="group inline-flex items-center hover:text-indigo-600 transition-colors"
                       >
                         {column.header}
                         <span className="ml-2 flex-none rounded">
                           {sortConfig.key === column.key && (
-                            <span className="text-indigo-600">
+                            <span className="text-indigo-600 font-bold">
                               {sortConfig.direction === 'asc' ? '↑' : '↓'}
                             </span>
                           )}
@@ -142,22 +143,30 @@ export default function CollapsibleTable<T extends { id: string | number }>({
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {sortedData.map((item) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  {columns.map((column) => (
-                    <td
-                      key={String(column.key)}
-                      className={`px-6 py-4 text-sm text-gray-900 ${
-                        column.className || ''
-                      }`}
-                    >
-                      {column.render
-                        ? column.render(item[column.key], item)
-                        : String(item[column.key])}
-                    </td>
-                  ))}
+              {sortedData.length === 0 ? (
+                <tr>
+                  <td colSpan={columns.length} className="px-6 py-8 text-center text-gray-500">
+                    No articles found matching the current criteria.
+                  </td>
                 </tr>
-              ))}
+              ) : (
+                sortedData.map((item, index) => (
+                  <tr key={item.id} className={`hover:bg-gray-50 transition-colors ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}`}>
+                    {columns.map((column) => (
+                      <td
+                        key={String(column.key)}
+                        className={`px-6 py-4 text-sm text-gray-900 ${
+                          column.className || ''
+                        }`}
+                      >
+                        {column.render
+                          ? column.render(item[column.key], item)
+                          : String(item[column.key])}
+                      </td>
+                    ))}
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>

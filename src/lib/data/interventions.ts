@@ -24,18 +24,18 @@ const supabase = createClient();
 // Map frontend categories to database categories and search strategies
 const categoryMap = {
   lifestyle: {
-    categories: ['lifestyle_factors', 'brain_health', 'mental_health'] as ArticleCategory[],
-    keywords: ['lifestyle', 'diet', 'exercise', 'sleep', 'nutrition', 'wellness', 'health', 'fitness', 'wellbeing', 'lifestyle factor', 'modifiable', 'environment', 'social', 'physical activity', 'mindfulness', 'meditation', 'stress management', 'self-care'],
+    categories: ['lifestyle_factors'] as ArticleCategory[],
+    keywords: ['lifestyle', 'diet', 'exercise', 'sleep', 'nutrition', 'wellness', 'fitness', 'wellbeing', 'lifestyle factor', 'modifiable', 'environment', 'social', 'physical activity', 'mindfulness', 'meditation', 'stress management', 'self-care', 'social connection', 'social support'],
     type: 'lifestyle'
   },
   clinical: {
-    categories: ['interventions', 'mental_health'] as ArticleCategory[],
-    keywords: ['therapy', 'medication', 'treatment', 'intervention', 'clinical', 'therapeutic', 'cbt', 'meditation', 'mindfulness'],
+    categories: ['interventions'] as ArticleCategory[],
+    keywords: ['therapy', 'medication', 'treatment', 'intervention', 'clinical', 'therapeutic', 'cbt', 'cognitive behavioral', 'psychotherapy', 'pharmacological', 'medication', 'drug', 'therapeutic approach'],
     type: 'clinical'
   },
   risk_factor: {
-    categories: ['mental_health', 'neuroscience', 'psychology'] as ArticleCategory[],
-    keywords: ['risk', 'factor', 'cause', 'trigger', 'vulnerability', 'predisposition', 'etiology'],
+    categories: ['risk_factors', 'mental_health', 'neuroscience', 'psychology'] as ArticleCategory[],
+    keywords: ['risk', 'factor', 'cause', 'trigger', 'vulnerability', 'predisposition', 'etiology', 'contributing factor', 'risk factor', 'causal factor', 'predisposing factor'],
     type: 'risk_factor'
   }
 };
@@ -100,20 +100,26 @@ export async function getInterventions(category: keyof typeof categoryMap) {
     console.log(`Filtered to ${relevantArticles.length} relevant ${category} articles`);
 
     // Transform the data to match our Intervention type
-    return relevantArticles.map((article): Intervention => ({
-      id: article.id,
-      slug: article.slug,
-      title: article.title,
-      category: article.category,
-      evidenceStrength: determineEvidenceStrength(article),
-      studyCount: countStudies(article),
-      reliabilityRating: determineReliability(article),
-      conditions: article.tags || [],
-      summary: article.summary || '',
-      content: article.content_blocks,
-      tags: article.tags || [],
-      status: article.status,
-    }));
+    return relevantArticles.map((article): Intervention => {
+      // Check if there's a stored reliability score in content_blocks
+      const storedReliability = article.content_blocks?.reliability_score;
+      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : determineReliability(article);
+      
+      return {
+        id: article.id,
+        slug: article.slug,
+        title: article.title,
+        category: article.category,
+        evidenceStrength: determineEvidenceStrength(article),
+        studyCount: countStudies(article),
+        reliabilityRating: reliabilityRating,
+        conditions: article.tags || [],
+        summary: article.summary || '',
+        content: article.content_blocks,
+        tags: article.tags || [],
+        status: article.status,
+      };
+    });
 
   } catch (error) {
     console.error('Error in getInterventions:', error);
@@ -184,20 +190,26 @@ export async function getInterventionsByCondition(
 
     console.log(`Filtered to ${filteredData.length} articles for condition: ${condition}`);
 
-    return filteredData.map((article): Intervention => ({
-      id: article.id,
-      slug: article.slug,
-      title: article.title,
-      category: article.category,
-      evidenceStrength: determineEvidenceStrength(article),
-      studyCount: countStudies(article),
-      reliabilityRating: determineReliability(article),
-      conditions: article.tags || [],
-      summary: article.summary || '',
-      content: article.content_blocks,
-      tags: article.tags || [],
-      status: article.status,
-    }));
+    return filteredData.map((article): Intervention => {
+      // Check if there's a stored reliability score in content_blocks
+      const storedReliability = article.content_blocks?.reliability_score;
+      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : determineReliability(article);
+      
+      return {
+        id: article.id,
+        slug: article.slug,
+        title: article.title,
+        category: article.category,
+        evidenceStrength: determineEvidenceStrength(article),
+        studyCount: countStudies(article),
+        reliabilityRating: reliabilityRating,
+        conditions: article.tags || [],
+        summary: article.summary || '',
+        content: article.content_blocks,
+        tags: article.tags || [],
+        status: article.status,
+      };
+    });
 
   } catch (error) {
     console.error('Error in getInterventionsByCondition:', error);
@@ -238,22 +250,55 @@ function countStudies(article: Article): number {
 
 function determineReliability(article: Article): number {
   // Base reliability on content quality indicators
-  let score = 3; // Base score
+  let score = 0.5; // Start with a lower base score
   
   const contentBlocks = article.content_blocks || {};
   const summary = article.summary || '';
+  const tags = article.tags || [];
   
   // Bonus for comprehensive content
-  if (Object.keys(contentBlocks).length > 5) score += 1;
-  if (summary.length > 200) score += 1;
+  const contentBlockCount = Object.keys(contentBlocks).length;
+  if (contentBlockCount > 2) score += 0.1;
+  if (contentBlockCount > 4) score += 0.1;
+  if (contentBlockCount > 6) score += 0.1;
   
-  // Bonus for evidence-based content
-  if (contentBlocks.evidence_summary) score += 1;
-  if (contentBlocks.key_studies) score += 1;
+  // Bonus for detailed summary
+  if (summary.length > 100) score += 0.05;
+  if (summary.length > 250) score += 0.05;
+  if (summary.length > 500) score += 0.05;
+  
+  // Bonus for evidence-based content (most important)
+  if (contentBlocks.evidence_summary) score += 0.15;
+  if (contentBlocks.key_studies) score += 0.15;
+  if (contentBlocks.key_studies_and_theories) score += 0.1;
   
   // Bonus for practical content
-  if (contentBlocks.practical_takeaways || contentBlocks.practical_applications) score += 1;
+  if (contentBlocks.practical_takeaways) score += 0.05;
+  if (contentBlocks.practical_applications) score += 0.05;
   
-  // Ensure score is between 1-5
-  return Math.min(5, Math.max(1, score));
+  // Bonus for well-tagged content
+  if (tags.length > 1) score += 0.02;
+  if (tags.length > 3) score += 0.02;
+  if (tags.length > 5) score += 0.02;
+  
+  // Bonus for comprehensive content sections
+  if (contentBlocks.overview) score += 0.02;
+  if (contentBlocks.definition) score += 0.02;
+  if (contentBlocks.symptoms_and_impact) score += 0.03;
+  if (contentBlocks.causes_and_mechanisms) score += 0.03;
+  if (contentBlocks.mechanisms) score += 0.03;
+  if (contentBlocks.relevance) score += 0.02;
+  if (contentBlocks.effectiveness) score += 0.05;
+  if (contentBlocks.evidence_base) score += 0.05;
+  
+  // Penalty for very basic content
+  if (contentBlockCount <= 1) score -= 0.1;
+  if (summary.length < 50) score -= 0.05;
+  
+  // Additional penalties for low-quality content
+  if (contentBlockCount === 0) score -= 0.15;
+  if (!summary || summary.length < 20) score -= 0.1;
+  
+  // Ensure score is between 0.1 and 1.0
+  return Math.min(1.0, Math.max(0.1, Math.round(score * 100) / 100));
 } 

@@ -7,13 +7,102 @@ import Link from 'next/link';
 
 type TabType = 'lifestyle' | 'clinical' | 'risk_factor';
 
+function ReliabilityHeaderWithTooltip() {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-flex items-center">
+      Reliability
+      <span
+        className="ml-1 cursor-pointer text-gray-400 hover:text-gray-600"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        tabIndex={0}
+        onFocus={() => setShow(true)}
+        onBlur={() => setShow(false)}
+        aria-label="How reliability is calculated"
+      >
+        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className="inline align-text-bottom">
+          <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+          <text x="10" y="15" textAnchor="middle" fontSize="12" fill="currentColor">?</text>
+        </svg>
+      </span>
+      {show && (
+        <div className="absolute z-[100] left-1/2 -translate-x-1/2 -top-3 transform -translate-y-full w-80 p-4 bg-white border border-gray-200 rounded-lg shadow-xl text-xs text-gray-700 pointer-events-none">
+          <div className="relative">
+            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
+            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+          </div>
+          <strong className="block mb-2">How reliability is calculated:</strong>
+          <ul className="list-disc pl-4 space-y-1">
+            <li>+0.8 for evidence summaries, key studies</li>
+            <li>+0.3 for multiple content blocks, detailed summaries</li>
+            <li>+0.3 for practical takeaways, implementation guides</li>
+            <li>+0.2 for comprehensive tagging</li>
+          </ul>
+          <div className="mt-2 text-gray-500 border-t pt-2">Articles are sorted by reliability score (highest to lowest).</div>
+        </div>
+      )}
+    </span>
+  );
+}
+
+function ReliabilityDisplay({ rating }: { rating: number | null | undefined }) {
+  if (rating === null || rating === undefined) {
+    return <span className="text-sm text-gray-500">N/A</span>;
+  }
+
+  // rating is already 0-1 scale from database
+  const raw = Math.max(0, Math.min(1, rating));
+  const percent = raw * 100;
+  const stars = raw * 5;
+  const fullStars = Math.floor(stars);
+  const partialStar = stars - fullStars;
+
+  return (
+    <div className="flex flex-col items-start min-w-[120px]">
+      <div className="flex items-center mb-1">
+        {[...Array(5)].map((_, i) => {
+          if (i < fullStars) {
+            return (
+              <svg key={i} className="h-4 w-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            );
+          } else if (i === fullStars && partialStar > 0) {
+            return (
+              <svg key={i} className="h-4 w-4 text-yellow-400" viewBox="0 0 20 20">
+                <defs>
+                  <linearGradient id={`star-gradient-${i}`} x1="0" x2="1" y1="0" y2="0">
+                    <stop offset={`${partialStar * 100}%`} stopColor="#facc15" />
+                    <stop offset={`${partialStar * 100}%`} stopColor="#d1d5db" />
+                  </linearGradient>
+                </defs>
+                <path fill={`url(#star-gradient-${i})`} d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            );
+          } else {
+            return (
+              <svg key={i} className="h-4 w-4 text-gray-300" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            );
+          }
+        })}
+        <span className="ml-2 text-sm text-gray-600">{(stars).toFixed(2)}/5</span>
+      </div>
+      <span className="text-xs text-gray-500">Raw: {raw.toFixed(2)}</span>
+      <span className="text-xs text-gray-400">({percent.toFixed(0)}%)</span>
+    </div>
+  );
+}
+
 const columns: Record<TabType, Column<Intervention>[]> = {
   lifestyle: [
     {
       key: 'title',
       header: 'Intervention',
       sortable: true,
-      className: 'w-1/3 max-w-xs',
+      className: 'w-1/2 max-w-xs',
       render: (value: any, item: Intervention) => (
         <div className="break-words">
           <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
@@ -46,39 +135,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       },
     },
     {
-      key: 'studyCount',
-      header: 'Studies',
-      sortable: true,
-      className: 'text-center',
-    },
-    {
       key: 'reliabilityRating',
-      header: 'Reliability',
+      header: <ReliabilityHeaderWithTooltip />,
       sortable: true,
-      render: (value: any, item: Intervention) => {
-        const rating = item.reliabilityRating;
-        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
-        
-        return (
-          <div className="flex items-center">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  className={`h-4 w-4 ${
-                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
-          </div>
-        );
-      },
+      render: (value: any, item: Intervention) => (
+        <ReliabilityDisplay rating={item.reliabilityRating} />
+      ),
     },
   ],
   clinical: [
@@ -86,7 +148,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'title',
       header: 'Intervention',
       sortable: true,
-      className: 'w-1/3 max-w-xs',
+      className: 'w-1/2 max-w-xs',
       render: (value: any, item: Intervention) => (
         <div className="break-words">
           <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
@@ -94,30 +156,6 @@ const columns: Record<TabType, Column<Intervention>[]> = {
           </Link>
         </div>
       ),
-    },
-    {
-      key: 'content',
-      header: 'Type',
-      sortable: true,
-      render: (value: any, item: Intervention) => {
-        const type = value?.type || 'Unknown';
-        const colors = {
-          Therapy: 'bg-purple-100 text-purple-800',
-          Medication: 'bg-blue-100 text-blue-800',
-          Combined: 'bg-indigo-100 text-indigo-800',
-          Alternative: 'bg-green-100 text-green-800',
-          Unknown: 'bg-gray-100 text-gray-800',
-        };
-        return (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              colors[type as keyof typeof colors]
-            }`}
-          >
-            {type}
-          </span>
-        );
-      },
     },
     {
       key: 'evidenceStrength',
@@ -143,39 +181,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       },
     },
     {
-      key: 'studyCount',
-      header: 'Studies',
-      sortable: true,
-      className: 'text-center',
-    },
-    {
       key: 'reliabilityRating',
-      header: 'Reliability',
+      header: <ReliabilityHeaderWithTooltip />,
       sortable: true,
-      render: (value: any, item: Intervention) => {
-        const rating = item.reliabilityRating;
-        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
-        
-        return (
-          <div className="flex items-center">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  className={`h-4 w-4 ${
-                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
-          </div>
-        );
-      },
+      render: (value: any, item: Intervention) => (
+        <ReliabilityDisplay rating={item.reliabilityRating} />
+      ),
     },
   ],
   risk_factor: [
@@ -183,7 +194,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       key: 'title',
       header: 'Risk Factor',
       sortable: true,
-      className: 'w-1/3 max-w-xs',
+      className: 'w-1/2 max-w-xs',
       render: (value: any, item: Intervention) => (
         <div className="break-words">
           <Link href={`/articles/${item.slug}`} className="text-indigo-600 hover:text-indigo-800 font-medium">
@@ -193,35 +204,10 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       ),
     },
     {
-      key: 'content',
-      header: 'Category',
-      sortable: true,
-      className: 'w-1/6',
-      render: (value: any, item: Intervention) => {
-        const category = value?.category || 'Unknown';
-        const colors = {
-          Lifestyle: 'bg-blue-100 text-blue-800',
-          Environmental: 'bg-green-100 text-green-800',
-          Genetic: 'bg-purple-100 text-purple-800',
-          Social: 'bg-yellow-100 text-yellow-800',
-          Unknown: 'bg-gray-100 text-gray-800',
-        };
-        return (
-          <span
-            className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-              colors[category as keyof typeof colors]
-            }`}
-          >
-            {category}
-          </span>
-        );
-      },
-    },
-    {
       key: 'evidenceStrength',
-      header: 'Correlation',
+      header: 'Evidence Strength',
       sortable: true,
-      className: 'w-1/6',
+      className: 'w-1/4',
       render: (value: any, item: Intervention) => {
         const strength = item.evidenceStrength;
         const colors = {
@@ -242,39 +228,12 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       },
     },
     {
-      key: 'studyCount',
-      header: 'Studies',
-      sortable: true,
-      className: 'w-1/12 text-center',
-    },
-    {
       key: 'reliabilityRating',
-      header: 'Reliability',
+      header: <ReliabilityHeaderWithTooltip />,
       sortable: true,
-      render: (value: any, item: Intervention) => {
-        const rating = item.reliabilityRating;
-        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
-        
-        return (
-          <div className="flex items-center">
-            <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  className={`h-4 w-4 ${
-                    star <= stars ? 'text-yellow-400' : 'text-gray-300'
-                  }`}
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
-            </div>
-            <span className="ml-2 text-sm text-gray-600">{stars}/5</span>
-          </div>
-        );
-      },
+      render: (value: any, item: Intervention) => (
+        <ReliabilityDisplay rating={item.reliabilityRating} />
+      ),
     },
   ],
 };
@@ -321,7 +280,14 @@ export default function EvidencePage() {
       setCurrentFilter(''); // Reset filter when switching tabs
       try {
         const data = await getInterventions(activeTab);
-        setInterventions(data);
+        // Sort by reliability rating (highest to lowest) as default
+        const sortedData = data.sort((a, b) => {
+          // Handle null/undefined reliability ratings
+          const aRating = a.reliabilityRating || 0;
+          const bRating = b.reliabilityRating || 0;
+          return bRating - aRating;
+        });
+        setInterventions(sortedData);
       } catch (err) {
         setError(`Failed to load ${tabTitles[activeTab].toLowerCase()}`);
         console.error(err);
@@ -342,7 +308,14 @@ export default function EvidencePage() {
         ? await getInterventionsByCondition(activeTab, filter)
         : await getInterventions(activeTab);
       console.log('Filtered data received:', data.length, 'items');
-      setInterventions(data);
+      // Sort by reliability rating (highest to lowest)
+      const sortedData = data.sort((a, b) => {
+        // Handle null/undefined reliability ratings
+        const aRating = a.reliabilityRating || 0;
+        const bRating = b.reliabilityRating || 0;
+        return bRating - aRating;
+      });
+      setInterventions(sortedData);
     } catch (err) {
       console.error('Filter error:', err);
       setError(`Failed to filter ${tabTitles[activeTab].toLowerCase()}`);
@@ -364,11 +337,11 @@ export default function EvidencePage() {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-4xl font-bold text-gray-900 mb-4">
           Evidence-Based Mental Health
         </h1>
-        <p className="mt-2 text-lg text-gray-600">
-          Comprehensive collection of evidence-based interventions, lifestyle factors, and risk factors
+        <p className="text-xl text-gray-600 leading-relaxed">
+          Comprehensive collection of evidence-based interventions, lifestyle factors, and risk factors ranked by scientific reliability
         </p>
       </div>
 
@@ -380,7 +353,7 @@ export default function EvidencePage() {
               key={key}
               onClick={() => setActiveTab(key as TabType)}
               className={`
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm
+                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
                 ${
                   activeTab === key
                     ? 'border-indigo-500 text-indigo-600'
@@ -396,11 +369,11 @@ export default function EvidencePage() {
 
       {/* Tab Description */}
       <div className="mb-8">
-        <p className="text-lg text-gray-600">
+        <p className="text-lg text-gray-600 leading-relaxed">
           {tabDescriptions[activeTab]}
         </p>
         {activeTab === 'risk_factor' && (
-          <div className="mt-4 p-4 bg-blue-50 rounded-lg">
+          <div className="mt-4 p-4 bg-blue-50 rounded-lg border border-blue-200">
             <p className="text-blue-800 text-sm">
               Note: This information is presented for educational purposes. 
               If you're concerned about your mental health, please consult with a healthcare professional.

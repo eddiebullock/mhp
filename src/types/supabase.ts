@@ -60,6 +60,7 @@ export interface Database {
             lived_experience?: string
             core_principles?: string
             key_studies_and_theories?: string
+            reliability_score?: string
           }
         }
         Insert: {
@@ -102,6 +103,7 @@ export interface Database {
             lived_experience?: string
             core_principles?: string
             key_studies_and_theories?: string
+            reliability_score?: string
           }
         }
         Update: {
@@ -144,6 +146,7 @@ export interface Database {
             lived_experience?: string
             core_principles?: string
             key_studies_and_theories?: string
+            reliability_score?: string
           }
         }
       }
