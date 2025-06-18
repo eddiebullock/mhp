@@ -34,7 +34,7 @@ const categoryMap = {
     type: 'clinical'
   },
   risk_factor: {
-    categories: ['risk_factors', 'mental_health', 'neuroscience', 'psychology'] as ArticleCategory[],
+    categories: ['risk_factors'] as ArticleCategory[],
     keywords: ['risk', 'factor', 'cause', 'trigger', 'vulnerability', 'predisposition', 'etiology', 'contributing factor', 'risk factor', 'causal factor', 'predisposing factor'],
     type: 'risk_factor'
   }

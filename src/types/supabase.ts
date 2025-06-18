@@ -14,7 +14,8 @@ export type ArticleCategory =
   | 'neurodiversity'
   | 'interventions'
   | 'lifestyle_factors'
-  | 'lab_testing';
+  | 'lab_testing'
+  | 'risk_factors';
 
 export interface Database {
   public: {
