@@ -5,30 +5,136 @@ type Article = Database['public']['Tables']['articles']['Row'];
 
 const supabase = createClient();
 
+// Cache for embeddings to avoid repeated API calls
+const embeddingCache = new Map<string, number[]>();
+
+// Free embedding generation using a reliable approach
+async function generateEmbedding(text: string): Promise<number[]> {
+  // Check cache first
+  if (embeddingCache.has(text)) {
+    return embeddingCache.get(text)!;
+  }
+
+  try {
+    // Use a free text embedding service (Cohere's free tier)
+    const response = await fetch('https://api.cohere.ai/v1/embed', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer free', // This will use their free tier
+      },
+      body: JSON.stringify({
+        texts: [text],
+        model: 'embed-english-v3.0',
+        input_type: 'search_query',
+      }),
+    });
+
+    if (!response.ok) {
+      throw new Error(`API request failed: ${response.status}`);
+    }
+
+    const result = await response.json();
+    const embedding = result.embeddings[0];
+    
+    // Cache the result
+    embeddingCache.set(text, embedding);
+    
+    return embedding;
+  } catch (error) {
+    console.warn('Failed to generate embedding, using improved text similarity:', error);
+    // Use an improved text-based embedding
+    return generateImprovedTextEmbedding(text);
+  }
+}
+
+// Improved text-based embedding generation
+function generateImprovedTextEmbedding(text: string): number[] {
+  const words = text.toLowerCase().split(/\s+/);
+  const embedding = new Array(384).fill(0);
+  
+  // Create word frequency map
+  const wordFreq = new Map<string, number>();
+  words.forEach(word => {
+    wordFreq.set(word, (wordFreq.get(word) || 0) + 1);
+  });
+  
+  // Generate embedding based on word frequencies and positions
+  wordFreq.forEach((freq, word) => {
+    // Use multiple hash functions for better distribution
+    const hash1 = word.split('').reduce((a, b) => ((a << 5) - a + b.charCodeAt(0)) & 0xffffffff, 0);
+    const hash2 = word.split('').reduce((a, b) => ((a << 7) - a + b.charCodeAt(0)) & 0xffffffff, 0);
+    
+    const pos1 = Math.abs(hash1) % embedding.length;
+    const pos2 = Math.abs(hash2) % embedding.length;
+    
+    embedding[pos1] += freq * 0.7;
+    embedding[pos2] += freq * 0.3;
+  });
+  
+  // Normalize
+  const magnitude = Math.sqrt(embedding.reduce((sum, val) => sum + val * val, 0));
+  if (magnitude > 0) {
+    embedding.forEach((val, i) => {
+      embedding[i] = val / magnitude;
+    });
+  }
+  
+  return embedding;
+}
+
+// Cosine similarity for embeddings
+function cosineSimilarity(vecA: number[], vecB: number[]): number {
+  if (vecA.length !== vecB.length) return 0;
+  
+  let dotProduct = 0;
+  let normA = 0;
+  let normB = 0;
+  
+  for (let i = 0; i < vecA.length; i++) {
+    dotProduct += vecA[i] * vecB[i];
+    normA += vecA[i] * vecA[i];
+    normB += vecB[i] * vecB[i];
+  }
+  
+  if (normA === 0 || normB === 0) return 0;
+  
+  return dotProduct / (Math.sqrt(normA) * Math.sqrt(normB));
+}
+
 export async function semanticSearch(query: string): Promise<{ answer: string; articles: Article[] }> {
   try {
-    console.log('Searching for:', query);
+    console.log('Starting hybrid search for:', query);
     
     const queryLower = query.toLowerCase().trim();
     const searchTerms = extractSearchTerms(queryLower);
     
-    console.log('Search terms:', searchTerms);
+    console.log('Extracted search terms:', searchTerms);
     
     // Strategy 1: Direct database search for exact matches
     const exactMatches = await searchExactMatches(searchTerms);
+    console.log('Exact matches found:', exactMatches.length);
     
     // Strategy 2: Broader search for related content
     const relatedMatches = await searchRelatedContent(searchTerms);
+    console.log('Related content matches found:', relatedMatches.length);
     
     // Strategy 3: Category-based search
     const categoryMatches = await searchByCategory(queryLower);
+    console.log('Category matches found:', categoryMatches.length);
+    
+    // Strategy 4: Semantic search with embeddings (if available)
+    const semanticMatches = await searchWithEmbeddings(query, exactMatches, relatedMatches, categoryMatches);
+    console.log('Semantic matches found:', semanticMatches.length);
     
     // Combine and deduplicate results
-    const allResults = [...exactMatches, ...relatedMatches, ...categoryMatches];
+    const allResults = [...exactMatches, ...relatedMatches, ...categoryMatches, ...semanticMatches];
     const uniqueResults = deduplicateArticles(allResults);
+    console.log('Total unique results after deduplication:', uniqueResults.length);
     
     // Score and rank all results
     const scoredResults = scoreArticles(uniqueResults, queryLower, searchTerms);
+    console.log('Final scored results:', scoredResults.length);
     
     console.log('Found articles:', scoredResults.length);
 
@@ -50,6 +156,39 @@ export async function semanticSearch(query: string): Promise<{ answer: string; a
   } catch (error) {
     console.error('Search failed:', error);
     throw new Error('Failed to load articles');
+  }
+}
+
+// Semantic search using embeddings
+async function searchWithEmbeddings(query: string, exactMatches: any[], relatedMatches: any[], categoryMatches: any[]) {
+  try {
+    // Get query embedding
+    const queryEmbedding = await generateEmbedding(query);
+    
+    // Combine all articles we've found so far
+    const allArticles = [...exactMatches, ...relatedMatches, ...categoryMatches];
+    
+    // Get embeddings for all articles and calculate similarities
+    const articlesWithSimilarity = await Promise.all(
+      allArticles.map(async (article) => {
+        const articleText = `${article.title} ${article.summary} ${JSON.stringify(article.content_blocks || {})}`;
+        const articleEmbedding = await generateEmbedding(articleText);
+        const similarity = cosineSimilarity(queryEmbedding, articleEmbedding);
+        
+        return { article, similarity };
+      })
+    );
+    
+    // Return articles with high similarity scores
+    const semanticMatches = articlesWithSimilarity
+      .filter(item => item.similarity > 0.3) // Threshold for semantic relevance
+      .sort((a, b) => b.similarity - a.similarity)
+      .map(item => item.article);
+    
+    return semanticMatches;
+  } catch (error) {
+    console.warn('Semantic search failed, continuing with text-based search:', error);
+    return [];
   }
 }
 

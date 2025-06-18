@@ -57,7 +57,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
-        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
         
         return (
           <div className="flex items-center">
@@ -154,7 +154,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
-        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
         
         return (
           <div className="flex items-center">
@@ -253,7 +253,7 @@ const columns: Record<TabType, Column<Intervention>[]> = {
       sortable: true,
       render: (value: any, item: Intervention) => {
         const rating = item.reliabilityRating;
-        const stars = Math.round(rating * 5); // Convert from 0-1 scale to 1-5 scale
+        const stars = Math.min(5, Math.max(1, Math.round(rating))); // Ensure it's 1-5
         
         return (
           <div className="flex items-center">
@@ -285,14 +285,12 @@ const filterOptions = [
   { label: 'Anxiety', value: 'anxiety' },
   { label: 'PTSD', value: 'ptsd' },
   { label: 'OCD', value: 'ocd' },
-  { label: 'ADHD', value: 'adhd' },
   { label: 'Bipolar Disorder', value: 'bipolar' },
   { label: 'Eating Disorders', value: 'eating_disorder' },
   { label: 'Sleep Disorders', value: 'sleep_disorder' },
   { label: 'Substance Use', value: 'substance_use' },
   { label: 'Personality Disorders', value: 'personality_disorder' },
   { label: 'Schizophrenia', value: 'schizophrenia' },
-  { label: 'Autism Spectrum', value: 'autism' },
   { label: 'Stress', value: 'stress' },
   { label: 'Trauma', value: 'trauma' },
   { label: 'Mood Disorders', value: 'mood_disorder' },
@@ -315,10 +313,12 @@ export default function EvidencePage() {
   const [interventions, setInterventions] = useState<Intervention[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentFilter, setCurrentFilter] = useState<string>('');
 
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
+      setCurrentFilter(''); // Reset filter when switching tabs
       try {
         const data = await getInterventions(activeTab);
         setInterventions(data);
@@ -334,15 +334,18 @@ export default function EvidencePage() {
   }, [activeTab]);
 
   const handleFilterChange = async (filter: string) => {
+    console.log('Filter changed to:', filter, 'for tab:', activeTab);
+    setCurrentFilter(filter);
     setLoading(true);
     try {
       const data = filter
         ? await getInterventionsByCondition(activeTab, filter)
         : await getInterventions(activeTab);
+      console.log('Filtered data received:', data.length, 'items');
       setInterventions(data);
     } catch (err) {
+      console.error('Filter error:', err);
       setError(`Failed to filter ${tabTitles[activeTab].toLowerCase()}`);
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -418,6 +421,8 @@ export default function EvidencePage() {
           filterOptions={filterOptions}
           onFilterChange={handleFilterChange}
           className="mb-8"
+          key={activeTab}
+          defaultFilter={currentFilter}
         />
       )}
     </div>

@@ -20,7 +20,7 @@ if (!supabaseUrl || !supabaseKey) {
 const supabase = createClient(supabaseUrl, supabaseKey);
 
 async function inspectArticles() {
-  console.log('🔍 Inspecting articles in database...\n');
+  console.log('Inspecting articles in database...\n');
 
   try {
     // Get all published articles
@@ -35,7 +35,7 @@ async function inspectArticles() {
       return;
     }
 
-    console.log(`📊 Found ${articles.length} published articles\n`);
+    console.log(`Found ${articles.length} published articles\n`);
 
     // Analyze categories
     const categories = {};
@@ -58,23 +58,23 @@ async function inspectArticles() {
       }
     });
 
-    console.log('📂 Categories:');
+    console.log('Categories:');
     Object.entries(categories).forEach(([category, count]) => {
       console.log(`  ${category}: ${count} articles`);
     });
 
-    console.log('\n🏷️  All tags found:');
+    console.log('\nAll tags found:');
     Array.from(tags).sort().forEach(tag => {
       console.log(`  - ${tag}`);
     });
 
-    console.log('\n📝 Content block types:');
+    console.log('\nContent block types:');
     Array.from(contentBlocks).sort().forEach(block => {
       console.log(`  - ${block}`);
     });
 
     // Show sample articles
-    console.log('\n📄 Sample articles:');
+    console.log('\nSample articles:');
     articles.slice(0, 5).forEach(article => {
       console.log(`\n  Title: ${article.title}`);
       console.log(`  Category: ${article.category}`);
@@ -86,7 +86,7 @@ async function inspectArticles() {
     // Test search terms
     const testQueries = ['depression', 'anxiety', 'therapy', 'brain', 'sleep', 'exercise'];
     
-    console.log('\n🔍 Testing search terms:');
+    console.log('\nTesting search terms:');
     testQueries.forEach(query => {
       const matchingArticles = articles.filter(article => {
         const title = article.title.toLowerCase();
