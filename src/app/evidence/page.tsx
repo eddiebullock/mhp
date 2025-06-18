@@ -9,29 +9,89 @@ type TabType = 'lifestyle' | 'clinical' | 'risk_factor';
 
 function ReliabilityHeaderWithTooltip() {
   const [show, setShow] = useState(false);
+  const [position, setPosition] = useState({ x: 0, y: 0 });
+  
+  const handleMouseEnter = (e: React.MouseEvent) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    
+    // Calculate position to center the tooltip on screen
+    const tooltipWidth = 320; // w-80 = 320px
+    const tooltipHeight = 200; // Approximate height
+    
+    let x = rect.left + rect.width / 2 - tooltipWidth / 2;
+    let y = rect.bottom + 10; // 10px below the question mark
+    
+    // Ensure tooltip doesn't go off screen
+    if (x < 10) x = 10;
+    if (x + tooltipWidth > viewportWidth - 10) x = viewportWidth - tooltipWidth - 10;
+    if (y + tooltipHeight > viewportHeight - 10) y = rect.top - tooltipHeight - 10;
+    
+    setPosition({ x, y });
+    setShow(true);
+  };
+  
+  const handleMouseLeave = () => {
+    setShow(false);
+  };
+
   return (
-    <span className="relative inline-flex items-center">
-      Reliability
-      <span
-        className="ml-1 cursor-pointer text-gray-400 hover:text-gray-600"
-        onMouseEnter={() => setShow(true)}
-        onMouseLeave={() => setShow(false)}
-        tabIndex={0}
-        onFocus={() => setShow(true)}
-        onBlur={() => setShow(false)}
-        aria-label="How reliability is calculated"
-      >
-        <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className="inline align-text-bottom">
-          <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
-          <text x="10" y="15" textAnchor="middle" fontSize="12" fill="currentColor">?</text>
-        </svg>
+    <>
+      <span className="relative inline-flex items-center">
+        Reliability
+        <span
+          className="ml-1 cursor-pointer text-gray-400 hover:text-gray-600"
+          onMouseEnter={handleMouseEnter}
+          onMouseLeave={handleMouseLeave}
+          tabIndex={0}
+          onFocus={handleMouseEnter}
+          onBlur={handleMouseLeave}
+          aria-label="How reliability is calculated"
+        >
+          <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor" className="inline align-text-bottom">
+            <circle cx="10" cy="10" r="9" stroke="currentColor" strokeWidth="2" fill="none" />
+            <text x="10" y="15" textAnchor="middle" fontSize="12" fill="currentColor">?</text>
+          </svg>
+        </span>
       </span>
+      
       {show && (
-        <div className="absolute z-[100] left-1/2 -translate-x-1/2 -top-3 transform -translate-y-full w-80 p-4 bg-white border border-gray-200 rounded-lg shadow-xl text-xs text-gray-700 pointer-events-none">
+        <div 
+          className="fixed z-[9999] bg-white border border-gray-200 rounded-lg shadow-2xl text-xs text-gray-700 pointer-events-none"
+          style={{
+            left: position.x,
+            top: position.y,
+            width: '320px',
+            padding: '16px'
+          }}
+        >
           <div className="relative">
-            <div className="absolute -bottom-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-gray-200"></div>
-            <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent border-t-white"></div>
+            {/* Arrow pointing to question mark */}
+            <div 
+              className="absolute w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-gray-200"
+              style={{
+                left: '50%',
+                transform: 'translateX(-50%)',
+                top: position.y < window.innerHeight / 2 ? '-4px' : 'auto',
+                bottom: position.y >= window.innerHeight / 2 ? '-4px' : 'auto',
+                borderTop: position.y >= window.innerHeight / 2 ? '4px solid #e5e7eb' : 'none',
+                borderBottom: position.y < window.innerHeight / 2 ? '4px solid #e5e7eb' : 'none'
+              }}
+            ></div>
+            <div 
+              className="absolute w-0 h-0 border-l-4 border-r-4 border-b-4 border-transparent border-b-white"
+              style={{
+                left: '50%',
+                transform: 'translateX(-50%)',
+                top: position.y < window.innerHeight / 2 ? '-3px' : 'auto',
+                bottom: position.y >= window.innerHeight / 2 ? '-3px' : 'auto',
+                borderTop: position.y >= window.innerHeight / 2 ? '4px solid white' : 'none',
+                borderBottom: position.y < window.innerHeight / 2 ? '4px solid white' : 'none'
+              }}
+            ></div>
           </div>
+          
           <strong className="block mb-2">How reliability is calculated:</strong>
           <ul className="list-disc pl-4 space-y-1">
             <li>+0.8 for evidence summaries, key studies</li>
@@ -39,10 +99,12 @@ function ReliabilityHeaderWithTooltip() {
             <li>+0.3 for practical takeaways, implementation guides</li>
             <li>+0.2 for comprehensive tagging</li>
           </ul>
-          <div className="mt-2 text-gray-500 border-t pt-2">Articles are sorted by reliability score (highest to lowest).</div>
+          <div className="mt-2 text-gray-500 border-t pt-2">
+            Articles are sorted by reliability score (highest to lowest).
+          </div>
         </div>
       )}
-    </span>
+    </>
   );
 }
 
