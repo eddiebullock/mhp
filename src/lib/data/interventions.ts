@@ -11,7 +11,7 @@ export type Intervention = {
   category: ArticleCategory;
   evidenceStrength: 'Strong' | 'Moderate' | 'Limited' | 'Insufficient';
   studyCount: number;
-  reliabilityRating: number;
+  reliabilityRating: number | null;
   conditions: string[];
   summary: string;
   content: Article['content_blocks'];
@@ -103,7 +103,7 @@ export async function getInterventions(category: keyof typeof categoryMap) {
     return relevantArticles.map((article): Intervention => {
       // Check if there's a stored reliability score in content_blocks
       const storedReliability = article.content_blocks?.reliability_score;
-      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : determineReliability(article);
+      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : null;
       
       return {
         id: article.id,
@@ -193,7 +193,7 @@ export async function getInterventionsByCondition(
     return filteredData.map((article): Intervention => {
       // Check if there's a stored reliability score in content_blocks
       const storedReliability = article.content_blocks?.reliability_score;
-      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : determineReliability(article);
+      const reliabilityRating = storedReliability ? parseFloat(storedReliability) : null;
       
       return {
         id: article.id,
