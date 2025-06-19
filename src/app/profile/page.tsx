@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase';
+import EditorDashboard from '@/components/EditorDashboard';
 
 interface SavedArticle {
   id: string;
@@ -19,6 +20,7 @@ export default function ProfilePage() {
   const [savedArticles, setSavedArticles] = useState<SavedArticle[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isEditor, setIsEditor] = useState(false);
 
   const supabase = createClient();
 
@@ -32,6 +34,13 @@ export default function ProfilePage() {
           router.replace('/auth/login');
           return;
         }
+
+        // Check if user is an editor
+        const authorizedEditors = [
+          'eddie@mentalhealthprogram.co.uk'
+          // Add more authorized editor emails here as needed
+        ];
+        setIsEditor(authorizedEditors.includes(session.user.email || ''));
 
         // Fetch profile
         const { data: profileData, error: profileError } = await supabase
@@ -141,6 +150,13 @@ export default function ProfilePage() {
                 Sign out
               </button>
             </div>
+
+            {/* Editor Dashboard */}
+            {isEditor && profile && (
+              <div className="mb-8">
+                <EditorDashboard userId={profile.id} />
+              </div>
+            )}
 
             <div className="mt-8">
               <h2 className="text-xl font-semibold text-gray-900 mb-4">Saved Articles</h2>

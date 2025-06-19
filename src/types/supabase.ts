@@ -188,12 +188,82 @@ export interface Database {
           created_at?: string
         }
       }
+      article_edits: {
+        Row: {
+          id: string
+          article_id: string
+          editor_id: string
+          edited_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          article_id: string
+          editor_id: string
+          edited_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          article_id?: string
+          editor_id?: string
+          edited_at?: string
+          created_at?: string
+        }
+      }
+      article_views: {
+        Row: {
+          id: string
+          article_id: string
+          viewer_id: string | null
+          viewed_at: string
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          article_id: string
+          viewer_id?: string | null
+          viewed_at?: string
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          article_id?: string
+          viewer_id?: string | null
+          viewed_at?: string
+          created_at?: string
+        }
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_editor_stats: {
+        Args: {
+          editor_user_id: string
+        }
+        Returns: {
+          total_edits: number
+          unique_articles_edited: number
+          total_views: number
+          total_saves: number
+          editor_score: number
+        }[]
+      }
+      get_editor_rankings: {
+        Args: Record<string, never>
+        Returns: {
+          editor_id: string
+          editor_email: string
+          total_edits: number
+          unique_articles_edited: number
+          total_views: number
+          total_saves: number
+          editor_score: number
+          rank_position: number
+        }[]
+      }
     }
     Enums: {
       [_ in never]: never

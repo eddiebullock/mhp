@@ -38,6 +38,42 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
           .single();
         setInitialSaved(!!saved);
       }
+
+      // Log the view for tracking article views
+      try {
+        // Check if user has already viewed this article today
+        if (user?.id) {
+          const today = new Date().toISOString().split('T')[0]; // Get today's date as YYYY-MM-DD
+          const { data: existingView } = await supabase
+            .from('article_views')
+            .select('id')
+            .eq('article_id', article.id)
+            .eq('viewer_id', user.id)
+            .gte('viewed_at', `${today}T00:00:00Z`)
+            .lt('viewed_at', `${today}T23:59:59Z`)
+            .single();
+
+          if (!existingView) {
+            await supabase
+              .from('article_views')
+              .insert({
+                article_id: article.id,
+                viewer_id: user.id,
+              });
+          }
+        } else {
+          // For anonymous users, always log the view
+          await supabase
+            .from('article_views')
+            .insert({
+              article_id: article.id,
+              viewer_id: null,
+            });
+        }
+      } catch (error) {
+        // Ignore errors for view logging
+        console.log('View logging error:', error);
+      }
     };
     fetchUserAndSaved();
   }, [article.id]);

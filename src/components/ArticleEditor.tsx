@@ -47,6 +47,18 @@ export default function ArticleEditor({ article, onSave, onCancel }: ArticleEdit
         .eq('id', article.id);
 
       if (error) throw error;
+
+      // Log the edit for tracking editor contributions
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase
+          .from('article_edits')
+          .insert({
+            article_id: article.id,
+            editor_id: user.id,
+          });
+      }
+
       onSave();
     } catch (err) {
       console.error('Error saving article:', err);
