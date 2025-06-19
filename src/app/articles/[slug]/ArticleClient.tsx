@@ -6,6 +6,8 @@ import ReactMarkdown from 'react-markdown';
 import ArticleEditor from '@/components/ArticleEditor';
 import { useSearchParams } from 'next/navigation';
 import { LockClosedIcon, LockOpenIcon } from '@heroicons/react/24/outline';
+import SaveArticleButton from '@/components/SaveArticleButton';
+import { createClient } from '@/lib/supabase';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 
@@ -19,6 +21,26 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
   const [currentArticle, setCurrentArticle] = useState(article);
   const [showLockMessage, setShowLockMessage] = useState(false);
   const searchParams = useSearchParams();
+  const [userId, setUserId] = useState<string | null>(null);
+  const [initialSaved, setInitialSaved] = useState<boolean>(false);
+
+  useEffect(() => {
+    const fetchUserAndSaved = async () => {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id ?? null);
+      if (user) {
+        const { data: saved } = await supabase
+          .from('saved_articles')
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('article_id', article.id)
+          .single();
+        setInitialSaved(!!saved);
+      }
+    };
+    fetchUserAndSaved();
+  }, [article.id]);
 
   const handleSave = () => {
     setIsEditing(false);
@@ -113,6 +135,14 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
       <main className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <div className="bg-white shadow rounded-lg overflow-hidden">
           <div className="px-6 py-8">
+            <div className="flex justify-between items-center mb-4">
+              <h1 className="text-3xl font-bold text-gray-900">{currentArticle.title}</h1>
+              <SaveArticleButton
+                articleId={article.id}
+                userId={userId}
+                initialSaved={initialSaved}
+              />
+            </div>
             <div className="flex justify-between items-start mb-4">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-indigo-100 text-indigo-800">
                 {article.category}
@@ -154,7 +184,6 @@ export default function ArticleClient({ article, isEditor }: ArticleClientProps)
               </div>
             )}
 
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">{currentArticle.title}</h1>
             <p className="text-lg text-gray-900 mb-6">{currentArticle.summary}</p>
             
             <div className="flex flex-wrap gap-2 mb-8">

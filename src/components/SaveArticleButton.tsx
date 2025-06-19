@@ -1,11 +1,12 @@
 'use client';
 
 import { useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
 
 interface SaveArticleButtonProps {
   articleId: string;
-  userId: string;
+  userId: string | null;
   initialSaved?: boolean;
 }
 
@@ -16,28 +17,28 @@ export default function SaveArticleButton({
 }: SaveArticleButtonProps) {
   const [isSaved, setIsSaved] = useState(initialSaved);
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleSave = async () => {
+    const supabase = createClient();
     setIsLoading(true);
     try {
+      if (!userId) {
+        // Prompt login/signup
+        router.push('/auth/login');
+        return;
+      }
       if (isSaved) {
-        // Remove from saved articles
         const { error } = await supabase
           .from('saved_articles')
           .delete()
           .match({ article_id: articleId, user_id: userId });
-
         if (error) throw error;
         setIsSaved(false);
       } else {
-        // Add to saved articles
         const { error } = await supabase.from('saved_articles').insert([
-          {
-            article_id: articleId,
-            user_id: userId,
-          },
+          { article_id: articleId, user_id: userId },
         ]);
-
         if (error) throw error;
         setIsSaved(true);
       }
@@ -57,40 +58,22 @@ export default function SaveArticleButton({
           ? 'bg-green-600 hover:bg-green-700'
           : 'bg-indigo-600 hover:bg-indigo-700'
       } focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50`}
+      title={userId ? (isSaved ? 'Unsave Article' : 'Save Article') : 'Log in to save articles'}
     >
       {isLoading ? (
         'Saving...'
-      ) : isSaved ? (
-        <>
-          <svg
-            className="-ml-1 mr-2 h-5 w-5"
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-          >
-            <path
-              fillRule="evenodd"
-              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-              clipRule="evenodd"
-            />
-          </svg>
-          Saved
-        </>
       ) : (
         <>
+          {/* Classic floppy disk save icon */}
           <svg
             className="-ml-1 mr-2 h-5 w-5"
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 20 20"
             fill="currentColor"
           >
-            <path
-              fillRule="evenodd"
-              d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-              clipRule="evenodd"
-            />
+            <path d="M17 3a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V3zm-2 0v4H5V3h10zm-5 12a2 2 0 1 1 0-4 2 2 0 0 1 0 4z" />
           </svg>
-          Save Article
+          {isSaved ? 'Saved' : 'Save Article'}
         </>
       )}
     </button>
