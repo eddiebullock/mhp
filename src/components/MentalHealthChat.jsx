@@ -21,6 +21,8 @@ export default function MentalHealthChat() {
   const [isAnimating, setIsAnimating] = useState(false);
   const chatRef = useRef(null);
   const inputRef = useRef(null);
+  const animationIntervalRef = useRef(null);
+  const fetchControllerRef = useRef(null);
 
   useEffect(() => {
     if (chatRef.current) {
@@ -44,11 +46,13 @@ export default function MentalHealthChat() {
       let i = 0;
       const cleanText = cleanMarkdown(lastMsg.content);
       setAnimatedText('');
-      const interval = setInterval(() => {
+      if (animationIntervalRef.current) clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = setInterval(() => {
         setAnimatedText(cleanText.slice(0, i + 1));
         i++;
         if (i >= cleanText.length) {
-          clearInterval(interval);
+          clearInterval(animationIntervalRef.current);
+          animationIntervalRef.current = null;
           setIsAnimating(false);
           // Mark this message as animated so it doesn't re-animate
           setMessages(msgs => {
@@ -58,22 +62,68 @@ export default function MentalHealthChat() {
           });
         }
       }, 12); // Speed of typing
-      return () => clearInterval(interval);
+      return () => {
+        if (animationIntervalRef.current) clearInterval(animationIntervalRef.current);
+      };
     }
   }, [messages]);
 
+  // Stop/cancel logic
+  const handleStop = () => {
+    // Stop animation
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+      setIsAnimating(false);
+      setMessages(msgs => {
+        if (msgs.length === 0) return msgs;
+        const last = msgs[msgs.length - 1];
+        if (last.role === 'assistant' && !last.animated) {
+          return [...msgs.slice(0, -1), { ...last, animated: true }];
+        }
+        return msgs;
+      });
+    }
+    // Abort fetch
+    if (fetchControllerRef.current) {
+      fetchControllerRef.current.abort();
+      fetchControllerRef.current = null;
+      setLoading(false);
+      setTyping(false);
+    }
+  };
+
+  // When a new user message is sent, mark the last assistant message as animated and stop animation
   const sendMessage = async () => {
     if (!input.trim()) return;
-    setMessages(msgs => [...msgs, { role: 'user', content: input }]);
+    // Mark last assistant message as animated and stop animation
+    setMessages(msgs => {
+      if (msgs.length === 0) return [...msgs, { role: 'user', content: input }];
+      const last = msgs[msgs.length - 1];
+      if (last.role === 'assistant' && !last.animated) {
+        return [...msgs.slice(0, -1), { ...last, animated: true }, { role: 'user', content: input }];
+      }
+      return [...msgs, { role: 'user', content: input }];
+    });
+    if (animationIntervalRef.current) {
+      clearInterval(animationIntervalRef.current);
+      animationIntervalRef.current = null;
+      setIsAnimating(false);
+    }
     setLoading(true);
     setTyping(true);
     setInput('');
+    // Setup fetch abort controller
+    const controller = new AbortController();
+    fetchControllerRef.current = controller;
     try {
       const res = await fetch('/api/mental-health-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input })
+        body: JSON.stringify({ question: input }),
+        signal: controller.signal
       });
+      fetchControllerRef.current = null;
       const data = await res.json();
       setSearchTerms(data.searchTermsUsed || []);
       if (data.crisisDetected) {
@@ -91,7 +141,11 @@ export default function MentalHealthChat() {
         ]);
       }
     } catch (e) {
-      setMessages(msgs => [...msgs, { role: 'assistant', content: 'Sorry, something went wrong.' }]);
+      if (e.name === 'AbortError') {
+        setMessages(msgs => [...msgs, { role: 'assistant', content: 'Response stopped by user.' }]);
+      } else {
+        setMessages(msgs => [...msgs, { role: 'assistant', content: 'Sorry, something went wrong.' }]);
+      }
     }
     setLoading(false);
     setTyping(false);
@@ -123,6 +177,15 @@ export default function MentalHealthChat() {
             >
               Send
             </button>
+            { (loading || typing || isAnimating) && (
+              <button
+                type="button"
+                className="ml-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-semibold border border-red-300 hover:bg-red-200 transition-colors"
+                onClick={handleStop}
+              >
+                Stop
+              </button>
+            )}
           </form>
         </div>
       ) : (
@@ -191,6 +254,15 @@ export default function MentalHealthChat() {
             >
               Send
             </button>
+            { (loading || typing || isAnimating) && (
+              <button
+                type="button"
+                className="ml-2 px-3 py-2 bg-red-100 text-red-700 rounded-lg text-xs font-semibold border border-red-300 hover:bg-red-200 transition-colors"
+                onClick={handleStop}
+              >
+                Stop
+              </button>
+            )}
           </form>
         </>
       )}

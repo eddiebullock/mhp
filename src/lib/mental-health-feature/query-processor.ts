@@ -11,6 +11,21 @@ const medicalMappings: Record<string, string> = {
   // Add more mappings as needed
 };
 
+const evidenceKeywords = [
+  'systematic review',
+  'meta-analysis',
+  'randomized controlled trial',
+  'RCT',
+  'treatment',
+  'intervention',
+  'mental health',
+  'student',
+  'prevalence',
+  'prevention',
+  'therapy',
+  'outcome',
+];
+
 const categories = [
   { type: 'sleep', keywords: ['sleep', 'insomnia', 'racing thoughts'] },
   { type: 'anxiety', keywords: ['anxiety', 'worry', 'panic'] },
@@ -41,10 +56,15 @@ export function processUserQuery(question: string) {
       break;
     }
   }
+  // Build a focused search query (only user keywords, not evidenceKeywords)
+  const mainTerms = Array.from(new Set([...keywords, ...mapped])).filter(Boolean);
+  const searchQuery = mainTerms.join(' ');
   return {
-    keywords: Array.from(new Set([...keywords, ...mapped])),
+    keywords: mainTerms,
     category,
     crisisDetected: crisis.crisisDetected,
     crisisTerms: crisis.crisisTerms,
+    originalQuestion: question,
+    searchQuery,
   };
 } 

@@ -4,6 +4,7 @@ import xml2js from 'xml2js';
 
 const PUBMED_API_KEY = process.env.PUBMED_API_KEY;
 const CROSSREF_MAILTO = process.env.CROSSREF_MAILTO;
+const SEMANTIC_SCHOLAR_API_KEY = process.env.SEMANTIC_SCHOLAR_API_KEY;
 
 const limiter = new Bottleneck({ maxConcurrent: 4, minTime: 120 });
 
@@ -87,13 +88,55 @@ async function searchArxiv(query: string) {
   }
 }
 
-export async function searchAllAPIs(processedQuery: { keywords: string[]; category: string }) {
-  const query = processedQuery.keywords.join(' ');
-  const [pubmed, crossref, openalex, arxiv] = await Promise.all([
-    searchPubMed(query),
-    searchCrossRef(query),
-    searchOpenAlex(query),
-    searchArxiv(query),
-  ]);
-  return [...pubmed, ...crossref, ...openalex, ...arxiv];
+async function searchSemanticScholar(query: string) {
+  try {
+    const url = `https://api.semanticscholar.org/graph/v1/paper/search?query=${encodeURIComponent(query)}&limit=10&fields=title,authors,year,venue,url,abstract`;
+    const { data } = await axios.get(url, {
+      headers: { 'x-api-key': SEMANTIC_SCHOLAR_API_KEY }
+    });
+    return data.data.map((item: any) => ({
+      title: item.title,
+      authors: item.authors?.map((a: any) => a.name).join(', ') || '',
+      journal: item.venue || '',
+      year: item.year || '',
+      url: item.url,
+      abstract: item.abstract || '',
+      source: 'semanticscholar',
+    }));
+  } catch (e) {
+    return [];
+  }
+}
+
+function dedupePapers(papers: any[]) {
+  const seen = new Set();
+  return papers.filter(p => {
+    const key = `${p.title}|${p.authors}|${p.journal}|${p.year}`;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
+export async function searchAllAPIs(processedQuery: { keywords: string[]; category: string; originalQuestion?: string; searchQuery?: string }) {
+  const queries = [processedQuery.searchQuery || processedQuery.keywords.join(' ')];
+  if (processedQuery.originalQuestion) queries.push(processedQuery.originalQuestion);
+  const allResults: any[] = [];
+  for (const query of queries) {
+    console.log('Searching APIs with query:', query);
+    const [pubmed, crossref, openalex, arxiv, semanticscholar] = await Promise.all([
+      searchPubMed(query),
+      searchCrossRef(query),
+      searchOpenAlex(query),
+      searchArxiv(query),
+      searchSemanticScholar(query),
+    ]);
+    console.log('PubMed results:', pubmed.map((p: any) => p.title));
+    console.log('CrossRef results:', crossref.map((p: any) => p.title));
+    console.log('OpenAlex results:', openalex.map((p: any) => p.title));
+    console.log('arXiv results:', arxiv.map((p: any) => p.title));
+    console.log('Semantic Scholar results:', semanticscholar.map((p: any) => p.title));
+    allResults.push(...pubmed, ...crossref, ...openalex, ...arxiv, ...semanticscholar);
+  }
+  return dedupePapers(allResults);
 } 
