@@ -79,7 +79,8 @@ export default async function ArticlePage({
     // Simple role-based system: Check if user email is in authorized editors list
     // This bypasses the RLS recursion issue and gives you full control
     const authorizedEditors = [
-      'eddie@mentalhealthprogram.co.uk'
+      'eddie@mentalhealthprogram.co.uk',
+      'daughterofthes3a@gmail.com'
       // Add more authorized editor emails here as needed
     ];
     

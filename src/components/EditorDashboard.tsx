@@ -74,6 +74,27 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
     return badges;
   };
 
+  const getStatRanking = (statKey: keyof EditorRanking) => {
+    if (!currentRanking || !rankings.length) return null;
+    const sorted = [...rankings].sort((a, b) => (b[statKey] as number) - (a[statKey] as number));
+    const index = sorted.findIndex(r => r.editor_id === userId);
+    if (index === -1) return null;
+    if (index < 10) return `You're in the top 10 editors for ${statKey.replace(/_/g, ' ')}`;
+    if (index < 25) return `You're in the top 25 editors for ${statKey.replace(/_/g, ' ')}`;
+    if (index < 50) return `You're in the top 50 editors for ${statKey.replace(/_/g, ' ')}`;
+    if (index < 100) return `You're in the top 100 editors for ${statKey.replace(/_/g, ' ')}`;
+    return null;
+  };
+
+  const getNextLevelProgress = (stats: EditorStats) => {
+    const score = stats.editor_score;
+    if (score < 10) return `Edit ${10 - stats.total_edits} more articles to achieve Bronze`;
+    if (score < 100) return `Edit ${100 - stats.total_edits} more articles to achieve Silver`;
+    if (score < 500) return `Edit ${500 - stats.total_edits} more articles to achieve Gold`;
+    if (score < 1000) return `Edit ${1000 - stats.total_edits} more articles to achieve Platinum`;
+    return null;
+  };
+
   if (loading) {
     return (
       <div className="animate-pulse">
@@ -114,14 +135,28 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Editor Dashboard</h2>
-            <div className="flex items-center mt-2">
+            <div className="flex items-center mt-2 space-x-2">
               <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${level.bgColor} ${level.color}`}>
                 {level.level} Editor
               </span>
-              {currentRanking && (
-                <span className="ml-3 text-sm text-gray-600">
-                  Rank #{currentRanking.rank_position} of {rankings.length} editors
-                </span>
+              {/* Gamification progress message */}
+              {stats && getNextLevelProgress(stats) && (
+                <span className="ml-2 text-xs text-gray-500">{getNextLevelProgress(stats)}</span>
+              )}
+            </div>
+            {/* Personalized top-N stat messages */}
+            <div className="flex flex-wrap gap-2 mt-2">
+              {stats && getStatRanking('total_edits') && (
+                <span className="text-xs text-indigo-600 bg-indigo-50 rounded px-2 py-1">{getStatRanking('total_edits')}</span>
+              )}
+              {stats && getStatRanking('total_views') && (
+                <span className="text-xs text-purple-600 bg-purple-50 rounded px-2 py-1">{getStatRanking('total_views')}</span>
+              )}
+              {stats && getStatRanking('total_saves') && (
+                <span className="text-xs text-yellow-600 bg-yellow-50 rounded px-2 py-1">{getStatRanking('total_saves')}</span>
+              )}
+              {stats && getStatRanking('editor_score') && (
+                <span className="text-xs text-gray-600 bg-gray-50 rounded px-2 py-1">{getStatRanking('editor_score')}</span>
               )}
             </div>
           </div>
@@ -204,44 +239,6 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
               >
                 {badge.name}
               </span>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Top Editors */}
-      {rankings.length > 0 && (
-        <div className="bg-white rounded-lg shadow p-6">
-          <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Editors</h3>
-          <div className="space-y-3">
-            {rankings.slice(0, 10).map((ranking, index) => (
-              <div
-                key={ranking.editor_id}
-                className={`flex items-center justify-between p-3 rounded-lg ${
-                  ranking.editor_id === userId ? 'bg-indigo-50 border border-indigo-200' : 'bg-gray-50'
-                }`}
-              >
-                <div className="flex items-center">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gray-200 text-sm font-medium text-gray-700">
-                    {index + 1}
-                  </div>
-                  <div className="ml-3">
-                    <div className="text-sm font-medium text-gray-900">
-                      {ranking.editor_email}
-                      {ranking.editor_id === userId && (
-                        <span className="ml-2 text-xs text-indigo-600">(You)</span>
-                      )}
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {ranking.total_edits} edits • {ranking.total_views.toLocaleString()} views • {ranking.total_saves.toLocaleString()} saves
-                    </div>
-                  </div>
-                </div>
-                <div className="text-right">
-                  <div className="text-sm font-medium text-gray-900">{Math.round(ranking.editor_score)}</div>
-                  <div className="text-xs text-gray-500">score</div>
-                </div>
-              </div>
             ))}
           </div>
         </div>
