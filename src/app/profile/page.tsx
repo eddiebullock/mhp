@@ -37,7 +37,8 @@ export default function ProfilePage() {
 
         // Check if user is an editor
         const authorizedEditors = [
-          'eddie@mentalhealthprogram.co.uk'
+          'eddie@mentalhealthprogram.co.uk',
+          'daughterofthes3a@gmail.com'
           // Add more authorized editor emails here as needed
         ];
         setIsEditor(authorizedEditors.includes(session.user.email || ''));
