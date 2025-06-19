@@ -3,12 +3,37 @@
 import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
+import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 
 type EditorStats = Database['public']['Functions']['get_editor_stats']['Returns'][0];
 type EditorRanking = Database['public']['Functions']['get_editor_rankings']['Returns'][0];
 
 interface EditorDashboardProps {
   userId: string;
+}
+
+// Tooltip component
+function Tooltip({ text }: { text: string }) {
+  const [show, setShow] = useState(false);
+  return (
+    <span className="relative inline-block align-middle">
+      <button
+        type="button"
+        className="ml-1 text-gray-400 hover:text-indigo-600 focus:outline-none"
+        onMouseEnter={() => setShow(true)}
+        onMouseLeave={() => setShow(false)}
+        tabIndex={0}
+        aria-label="Show explanation"
+      >
+        <QuestionMarkCircleIcon className="h-4 w-4 inline" />
+      </button>
+      {show && (
+        <div className="absolute z-50 left-1/2 -translate-x-1/2 mt-2 w-56 bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-xs text-gray-700">
+          {text}
+        </div>
+      )}
+    </span>
+  );
 }
 
 export default function EditorDashboard({ userId }: EditorDashboardProps) {
@@ -177,7 +202,10 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
               </svg>
             </div>
             <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.total_edits}</div>
+              <div className="flex items-center">
+                <div className="text-2xl font-bold text-gray-900">{stats.total_edits}</div>
+                <Tooltip text="Total number of edits you have made to any article. Multiple edits to the same article are all counted." />
+              </div>
               <div className="text-sm text-gray-600">Total Edits</div>
             </div>
           </div>
@@ -191,7 +219,10 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
               </svg>
             </div>
             <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.unique_articles_edited}</div>
+              <div className="flex items-center">
+                <div className="text-2xl font-bold text-gray-900">{stats.unique_articles_edited}</div>
+                <Tooltip text="Number of unique articles you have edited at least once. Editing the same article multiple times only counts as one here." />
+              </div>
               <div className="text-sm text-gray-600">Articles Edited</div>
             </div>
           </div>
@@ -206,7 +237,10 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
               </svg>
             </div>
             <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.total_views.toLocaleString()}</div>
+              <div className="flex items-center">
+                <div className="text-2xl font-bold text-gray-900">{stats.total_views.toLocaleString()}</div>
+                <Tooltip text="Total number of times articles you have edited have been viewed by users (including repeat views)." />
+              </div>
               <div className="text-sm text-gray-600">Total Views</div>
             </div>
           </div>
@@ -220,7 +254,10 @@ export default function EditorDashboard({ userId }: EditorDashboardProps) {
               </svg>
             </div>
             <div className="ml-4">
-              <div className="text-2xl font-bold text-gray-900">{stats.total_saves.toLocaleString()}</div>
+              <div className="flex items-center">
+                <div className="text-2xl font-bold text-gray-900">{stats.total_saves.toLocaleString()}</div>
+                <Tooltip text="Total number of times articles you have edited have been saved by users to their profile." />
+              </div>
               <div className="text-sm text-gray-600">Total Saves</div>
             </div>
           </div>
