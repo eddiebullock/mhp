@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
-import PaperCitation from './PaperCitation';
+import { PaperCitation } from './PaperCitation';
 
 export default function AcademicResearchAssistantChat() {
   const [messages, setMessages] = useState([]);
@@ -8,17 +8,16 @@ export default function AcademicResearchAssistantChat() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [inputAtBottom, setInputAtBottom] = useState(false);
-  const [animatedText, setAnimatedText] = useState('');
-  const [isAnimating, setIsAnimating] = useState(false);
-  const chatRef = useRef(null);
+  const [animatedPapers, setAnimatedPapers] = useState(new Set());
   const inputRef = useRef(null);
-  const animationIntervalRef = useRef(null);
+  const chatRef = useRef(null);
 
+  // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (chatRef.current) {
       chatRef.current.scrollTop = chatRef.current.scrollHeight;
     }
-  }, [messages, animatedText]);
+  }, [messages]);
 
   // Animate input bar from center to bottom after first message
   useEffect(() => {
@@ -27,63 +26,94 @@ export default function AcademicResearchAssistantChat() {
     }
   }, [messages, inputAtBottom]);
 
-  // Typewriter animation for assistant responses
+  // Animation effect for papers
   useEffect(() => {
-    if (messages.length === 0) return;
-    const lastMsg = messages[messages.length - 1];
-    if (lastMsg.role === 'assistant' && lastMsg.academicData && !lastMsg.animated && !isAnimating) {
-      setIsAnimating(true);
-      // Render the academic response as plain text for animation
-      const plainText = renderAcademicResponsePlain(lastMsg.academicData);
-      let i = 0;
-      setAnimatedText('');
-      if (animationIntervalRef.current) clearInterval(animationIntervalRef.current);
-      animationIntervalRef.current = setInterval(() => {
-        setAnimatedText(plainText.slice(0, i + 1));
-        i++;
-        if (i >= plainText.length) {
-          clearInterval(animationIntervalRef.current);
-          animationIntervalRef.current = null;
-          setIsAnimating(false);
-          // Mark this message as animated so it doesn't re-animate
-          setMessages(msgs => {
-            const newMsgs = [...msgs];
-            newMsgs[newMsgs.length - 1] = { ...lastMsg, animated: true };
-            return newMsgs;
-          });
-        }
-      }, 12); // Speed of typing
-      return () => {
-        if (animationIntervalRef.current) clearInterval(animationIntervalRef.current);
-      };
+    const animatePapers = () => {
+      const paperElements = document.querySelectorAll('.paper-card');
+      paperElements.forEach((element, index) => {
+        setTimeout(() => {
+          element.classList.add('animate-in');
+        }, index * 150); // 150ms delay between each paper
+      });
+      
+      // Animate the show more button after papers
+      const showMoreBtn = document.querySelector('.show-more-btn');
+      if (showMoreBtn) {
+        setTimeout(() => {
+          showMoreBtn.classList.add('animate-in');
+        }, paperElements.length * 150 + 200); // After all papers + 200ms
+      }
+    };
+
+    // Trigger animation when papers are rendered
+    if (messages.length > 0) {
+      const lastMessage = messages[messages.length - 1];
+      if (lastMessage?.papers && lastMessage.papers.length > 0) {
+        // Small delay to ensure DOM is ready
+        setTimeout(animatePapers, 100);
+      }
     }
   }, [messages]);
 
-  const sendMessage = async () => {
-    if (!input.trim()) return;
-    setMessages(msgs => [...msgs, { role: 'user', content: input }]);
-    setLoading(true);
-    setError(null);
-    setInput('');
+  const sendMessage = async (showMore = false) => {
+    if (!input.trim() && !showMore) return;
+    
+    if (!showMore) {
+      setMessages(msgs => [...msgs, { role: 'user', content: input }]);
+      setLoading(true);
+      setError(null);
+      setInput('');
+    } else {
+      setLoading(true);
+      setError(null);
+    }
+    
     try {
       const res = await fetch('/api/academic-research-assistant-chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: input })
+        body: JSON.stringify({ 
+          question: showMore ? messages[messages.length - 2]?.content : input,
+          showMore 
+        })
       });
       if (!res.ok) {
         throw new Error('Error from server');
       }
       const data = await res.json();
-      setMessages(msgs => [
-        ...msgs,
-        {
-          role: 'assistant',
-          content: data.response,
-          academic: data.academic,
-          academicData: data // full structured response
-        }
-      ]);
+      
+      // Handle new response format with papers object
+      const papers = data.papers || [];
+      const searchTerms = data.searchTerms || [];
+      const totalFound = data.totalFound || 0;
+      const uniqueFound = data.uniqueFound || 0;
+      const sourceDistribution = data.sourceDistribution || {};
+      const hasMore = data.hasMore || false;
+      
+      if (showMore) {
+        // Update the last assistant message with more papers
+        setMessages(msgs => {
+          const newMsgs = [...msgs];
+          const lastMsg = newMsgs[newMsgs.length - 1];
+          if (lastMsg && lastMsg.role === 'assistant') {
+            lastMsg.papers = papers;
+            lastMsg.hasMore = hasMore;
+            lastMsg.sourceDistribution = sourceDistribution;
+          }
+          return newMsgs;
+        });
+      } else {
+        setMessages(msgs => [
+          ...msgs,
+          {
+            role: 'assistant',
+            content: `Found ${papers.length} relevant papers for your query.`,
+            papers: papers,
+            hasMore: hasMore,
+            sourceDistribution: sourceDistribution
+          }
+        ]);
+      }
     } catch (e) {
       setError('Sorry, something went wrong.');
     }
@@ -143,6 +173,77 @@ export default function AcademicResearchAssistantChat() {
       });
     }
     return text;
+  };
+
+  // Render papers in a simple, clean format with animations
+  const renderPapers = (papers, hasMore = false, sourceDistribution = {}) => {
+    if (!papers || papers.length === 0) {
+      return <div className="text-gray-500">No relevant papers found.</div>;
+    }
+
+    return (
+      <div className="space-y-4">
+        <div className="text-sm text-gray-600 mb-3 fade-in">
+          Found {papers.length} relevant papers:
+          {Object.keys(sourceDistribution).length > 0 && (
+            <div className="text-xs text-gray-500 mt-1">
+              Sources: {Object.entries(sourceDistribution).map(([source, count]) => `${source}: ${count}`).join(', ')}
+            </div>
+          )}
+        </div>
+        <div className="space-y-4">
+          {papers.map((paper, index) => (
+            <div 
+              key={`${paper.title}-${index}`}
+              className="paper-card border border-gray-200 dark:border-gray-700 rounded-lg p-4 bg-gray-50 dark:bg-gray-800"
+            >
+              <div className="font-semibold text-lg mb-2">
+                <a 
+                  href={paper.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="text-indigo-600 dark:text-indigo-400 hover:underline transition-colors duration-200"
+                >
+                  {paper.title}
+                </a>
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <strong>Authors:</strong> {paper.authors}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                <strong>Journal:</strong> {paper.journal} • <strong>Year:</strong> {paper.year} • <strong>Source:</strong> {paper.source}
+              </div>
+              {paper.abstract && (
+                <div className="text-sm text-gray-700 dark:text-gray-300 mt-2">
+                  <strong>Abstract:</strong> {paper.abstract.length > 300 ? paper.abstract.substring(0, 300) + '...' : paper.abstract}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+        {hasMore && (
+          <div className="text-center mt-4">
+            <button
+              onClick={() => sendMessage(true)}
+              className="show-more-btn bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-6 py-2 rounded-lg"
+              disabled={loading}
+            >
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <svg className="spinner h-4 w-4" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Loading...
+                </span>
+              ) : (
+                'Show More Papers'
+              )}
+            </button>
+          </div>
+        )}
+      </div>
+    );
   };
 
   const renderAcademicResponse = (academicData) => {
@@ -282,10 +383,8 @@ export default function AcademicResearchAssistantChat() {
                         <span className={`text-xs font-semibold ${msg.role === 'user' ? 'text-indigo-200' : 'text-indigo-600 dark:text-indigo-300'}`}>{msg.role === 'user' ? 'You' : 'Academic Assistant'}</span>
                       </div>
                       <div className="text-base leading-relaxed">
-                        {msg.role === 'assistant' && msg.academicData && !msg.animated ? (
-                          <span>{animatedText}<span className="animate-pulse">|</span></span>
-                        ) : msg.role === 'assistant' && msg.academicData ? (
-                          renderAcademicResponse(msg.academicData)
+                        {msg.role === 'assistant' && msg.papers ? (
+                          renderPapers(msg.papers, msg.hasMore, msg.sourceDistribution)
                         ) : (
                           msg.content
                         )}
