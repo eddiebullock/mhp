@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClient } from '@/lib/supabase';
 import { Database } from '@/types/supabase';
 import Link from 'next/link';
-import { ChevronDownIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
+import { ChevronDownIcon, ChevronRightIcon, AcademicCapIcon, UserGroupIcon, HeartIcon, BeakerIcon, LightBulbIcon, PuzzlePieceIcon, Cog6ToothIcon, ExclamationTriangleIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 
 type Article = Database['public']['Tables']['articles']['Row'];
 
@@ -15,6 +15,7 @@ const categoryStructure = {
   neurodiversity: {
     name: 'Neurodiversity',
     color: 'bg-indigo-100 text-indigo-800',
+    icon: UserGroupIcon,
     subcategories: {
       adhd: 'ADHD',
       autism: 'Autism',
@@ -26,6 +27,7 @@ const categoryStructure = {
   mental_health: {
     name: 'Mental Health',
     color: 'bg-blue-100 text-blue-800',
+    icon: HeartIcon,
     subcategories: {
       depression: 'Depression',
       anxiety: 'Anxiety',
@@ -38,6 +40,7 @@ const categoryStructure = {
   lifestyle_factors: {
     name: 'Lifestyle Factors',
     color: 'bg-teal-100 text-teal-800',
+    icon: GlobeAltIcon,
     subcategories: {
       sleep: 'Sleep',
       exercise: 'Exercise',
@@ -50,6 +53,7 @@ const categoryStructure = {
   neuroscience: {
     name: 'Neuroscience',
     color: 'bg-purple-100 text-purple-800',
+    icon: AcademicCapIcon,
     subcategories: {
       neuroplasticity: 'Neuroplasticity',
       neurotransmitters: 'Neurotransmitters',
@@ -62,6 +66,7 @@ const categoryStructure = {
   interventions: {
     name: 'Interventions',
     color: 'bg-red-100 text-red-800',
+    icon: PuzzlePieceIcon,
     subcategories: {
       therapy: 'Therapy',
       medication: 'Medication',
@@ -73,6 +78,7 @@ const categoryStructure = {
   brain_health: {
     name: 'Brain Health',
     color: 'bg-yellow-100 text-yellow-800',
+    icon: LightBulbIcon,
     subcategories: {
       cognitive: 'Cognitive Health',
       aging: 'Brain Aging',
@@ -83,6 +89,7 @@ const categoryStructure = {
   psychology: {
     name: 'Psychology',
     color: 'bg-green-100 text-green-800',
+    icon: Cog6ToothIcon,
     subcategories: {
       cognitive: 'Cognitive Psychology',
       behavioral: 'Behavioral Psychology',
@@ -93,11 +100,25 @@ const categoryStructure = {
   lab_testing: {
     name: 'Lab Testing',
     color: 'bg-orange-100 text-orange-800',
+    icon: BeakerIcon,
     subcategories: {
       biomarkers: 'Biomarkers',
       genetics: 'Genetic Testing',
       blood: 'Blood Tests',
       imaging: 'Brain Imaging',
+    }
+  },
+  risk_factors: {
+    name: 'Risk Factors',
+    color: 'bg-pink-100 text-pink-800',
+    icon: ExclamationTriangleIcon,
+    subcategories: {
+      genetic: 'Genetic',
+      environmental: 'Environmental',
+      psychological: 'Psychological',
+      lifestyle: 'Lifestyle',
+      medical: 'Medical',
+      social: 'Social',
     }
   },
 };
@@ -203,6 +224,7 @@ export default function TopicsPage() {
             const { subcategoryArticles, uncategorizedArticles } = getCategoryArticles(categoryKey);
             const totalArticles = getArticlesByCategory(categoryKey).length;
             const isExpanded = expandedCategories.has(categoryKey);
+            const Icon = categoryInfo.icon;
 
             return (
               <div key={categoryKey} className="bg-white shadow rounded-lg overflow-hidden">
@@ -210,7 +232,10 @@ export default function TopicsPage() {
                   onClick={() => toggleCategory(categoryKey)}
                   className="w-full px-6 py-4 flex items-center justify-between hover:bg-gray-50 transition-colors"
                 >
-                  <div className="flex items-center">
+                  <div className="flex items-center space-x-3">
+                    <span className="inline-flex items-center justify-center rounded-full bg-gray-100 p-2 mr-2">
+                      <Icon className="h-6 w-6 text-gray-500" aria-hidden="true" />
+                    </span>
                     <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${categoryInfo.color}`}>
                       {categoryInfo.name}
                     </span>
