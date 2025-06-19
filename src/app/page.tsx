@@ -145,6 +145,12 @@ export default function HomePage() {
               Browse Articles
             </Link>
           </div>
+
+          <div className="my-4">
+            <Link href="/mental-health-page" className="text-blue-600 underline font-semibold">
+              Try the Mental Health Research Chatbot
+            </Link>
+          </div>
         </div>
 
         <div className="mt-20">
